@@ -1,0 +1,42 @@
+<div class="modal-root">
+  <div class="receipt-container" style="position: relative;">
+    <ion-button fill="clear" (click)="dismiss()" class="close-btn" style="position: absolute; top: 8px; right: 8px; --padding-start: 8px; --padding-end: 8px; z-index: 10;">
+      <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <div class="receipt-header" style="margin-top: 12px;">
+      <div class="icon-circle">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <h2>{{ transaction.description || 'Consumo Kiosco' }}</h2>
+      <p class="date">{{ transaction.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+      <h1 class="total-amount">- $ {{ transaction.amountCents / 100 | number:'1.2-2' }}</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="receipt-body">
+      <h3 class="section-title">Productos</h3>
+      
+      <div class="items-list" *ngIf="transaction.items && transaction.items.length > 0; else noItems">
+        <div class="receipt-item" *ngFor="let item of transaction.items">
+          <div class="item-main">
+            <span class="qty">{{ item.quantity }}x</span>
+            <span class="name">{{ item.description || item.name || 'Producto Genérico' }}</span>
+          </div>
+          <span class="price">$ {{ item.totalLineCents / 100 | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <ng-template #noItems>
+        <p class="empty-items">No hay detalle de productos para esta compra.</p>
+      </ng-template>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <ion-button fill="clear" expand="block" color="danger" (click)="dismiss()" style="font-weight: 600;">
+        CERRAR
+      </ion-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div class="card-modal">
+    <div class="child-header">
+      <div class="avatar">
+        {{ child.firstName[0] }}{{ child.lastName[0] }}
+      </div>
+      <div class="child-text">
+        <h3>{{ child.firstName }} {{ child.lastName }}</h3>
+        <p>Vincular tarjeta física</p>
+      </div>
+    </div>
+
+    <h2 class="title">Activar tarjeta</h2>
+    <p class="subtitle">
+      Podés ingresar el código manualmente o apoyando la tarjeta en el celular.
+    </p>
+
+    <ion-item lines="none" class="uid-input">
+      <ion-label position="stacked">Código de la tarjeta</ion-label>
+
+      <ion-input formControlName="uid" placeholder="Ej: 04A1B2C3D4" inputmode="text" autocapitalize="characters"
+        [readonly]="scanning || saving"></ion-input>
+
+      <ion-button type="button" slot="end" fill="clear" size="small" (click)="readWithNfc()"
+        [disabled]="scanning || saving">
+        {{ scanning ? 'Leyendo…' : 'Leer con NFC' }}
+      </ion-button>
+    </ion-item>
+
+    <p class="hint" *ngIf="!scanning">
+      Si tu celular tiene NFC, apoyá la tarjeta en la parte trasera para leer el código automáticamente.
+    </p>
+
+      <ion-toolbar class="modal-actions ion-no-border">
+        <ion-buttons slot="start">
+          <ion-button (click)="cancel()" color="danger">CANCELAR</ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button
+            (click)="submit()"
+            [disabled]="form.invalid || saving"
+            class="save-btn"
+          >
+            GUARDAR
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+  </div>
+</form>

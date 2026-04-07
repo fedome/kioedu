@@ -1,0 +1,80 @@
+<div class="user-list-container">
+    <header class="list-header">
+        <div class="title-section">
+            <h1>Usuarios del Sistema</h1>
+            <p>Gestiona los accesos y roles de los cajeros y administradores.</p>
+        </div>
+        <div class="actions">
+            <button class="btn-primary" (click)="createUser()">
+                <lucide-angular [img]="PlusIcon" class="w-4 h-4 mr-2"></lucide-angular> Nuevo Usuario
+            </button>
+        </div>
+    </header>
+
+    <div class="list-card">
+        <div class="table-responsive">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Estado</th>
+                        <th class="text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isLoading()) {
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="loader">Cargando usuarios...</div>
+                        </td>
+                    </tr>
+                    } @else if (users().length === 0) {
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <p>No se encontraron usuarios.</p>
+                        </td>
+                    </tr>
+                    } @else {
+                    @for (user of users(); track user.id) {
+                    <tr [class.inactive]="user.isActive === false">
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">{{ user.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <div class="roles-badges">
+                                @for (role of user.roles; track role) {
+                                <span class="badge" [class]="role.toLowerCase()">{{ role }}</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-indicator" [class.active]="user.isActive !== false">
+                                {{ user.isActive !== false ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td class="text-right actions-cell">
+                            <button class="btn-icon" (click)="editUser(user)" title="Editar">
+                                <lucide-angular [img]="EditIcon" class="w-5 h-5"></lucide-angular>
+                            </button>
+                            <button class="btn-icon" [class.danger]="user.isActive !== false"
+                                (click)="toggleUserStatus(user)"
+                                [title]="user.isActive !== false ? 'Desactivar' : 'Reactivar'">
+                                <lucide-angular [img]="user.isActive !== false ? UserXIcon : UserCheckIcon"
+                                    class="w-5 h-5"></lucide-angular>
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<app-user-form-modal [isOpen]="isModalOpen()" [user]="selectedUser()" (close)="closeModal()" (saved)="loadUsers()" />

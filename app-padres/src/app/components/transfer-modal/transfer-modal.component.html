@@ -1,0 +1,47 @@
+<div class="modal-root">
+  <div class="modal-card" style="position: relative; overflow: hidden;">
+    <ion-button fill="clear" (click)="dismiss()" class="close-btn" style="position: absolute; top: 8px; right: 8px; --padding-start: 8px; --padding-end: 8px; z-index: 10;">
+      <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <div class="icon-header" style="margin-top: 12px;">
+      <div class="icon-circle">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+      </div>
+      <h2 style="margin: 0 0 8px; font-weight: 800; font-size: 1.2rem; color: var(--mk-text-main);">Transferir Saldo</h2>
+      <p>Pasá dinero de una cuenta a otra al instante.</p>
+    </div>
+
+    <form [formGroup]="transferForm" (ngSubmit)="submit()">
+      <ion-item class="mk-input-premium ion-margin-bottom" lines="none">
+        <ion-label position="stacked">Origen</ion-label>
+        <ion-select formControlName="fromChildId" placeholder="Seleccionar origen..." okText="Aceptar" cancelText="Cancelar">
+          <ion-select-option *ngFor="let child of children" [value]="child.id">
+            {{ child.firstName }} (Saldo: $ {{ (child.accounts?.[0]?.balanceCents || 0) / 100 | number:'1.2-2' }})
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="mk-input-premium ion-margin-bottom" lines="none">
+        <ion-label position="stacked">Destino</ion-label>
+        <ion-select formControlName="toChildId" placeholder="Seleccionar destino..." okText="Aceptar" cancelText="Cancelar">
+          <ion-select-option *ngFor="let child of children" [value]="child.id" [disabled]="child.id === transferForm.value.fromChildId">
+            {{ child.firstName }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="mk-input-premium amount-input ion-margin-bottom" lines="none">
+        <ion-label position="stacked">Monto a transferir ($)</ion-label>
+        <ion-input type="number" inputmode="decimal" formControlName="amount" placeholder="0.00"></ion-input>
+      </ion-item>
+
+      <div class="action-buttons">
+        <ion-button expand="block" type="submit" class="pill-button confirm-btn" [disabled]="transferForm.invalid || loading">
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+          <span *ngIf="!loading">Transferir</span>
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</div>

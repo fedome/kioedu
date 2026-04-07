@@ -1,0 +1,93 @@
+.card-modal {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Alumno en cabecera */
+.child-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mk-avatar-bg);
+  color: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.child-text h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mk-text-main);
+}
+
+.child-text p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--mk-text-subtle);
+}
+
+/* Texto principal */
+.title {
+  margin: 6px 0 2px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--mk-text-main);
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--mk-text-subtle);
+}
+
+/* Input + textos */
+.uid-input {
+  --border-radius: 10px;
+  --background: var(--mk-input-bg);
+  --color: var(--mk-input-text);
+  --placeholder-color: rgba(148, 163, 184, 0.7);
+  border-radius: 10px;
+  border: 1px solid var(--mk-input-border);
+}
+
+.hint {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--mk-text-subtle);
+}
+
+.error {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--ion-color-danger);
+}
+
+/* Botones */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+
+  ion-button {
+    --border-radius: 999px;
+    padding-inline: 10px;
+  }
+}
+
+/* Modal toolbar */
+.modal-actions {
+  --background: transparent;
+}

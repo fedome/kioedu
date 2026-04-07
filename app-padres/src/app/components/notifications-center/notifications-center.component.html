@@ -1,0 +1,36 @@
+<ng-container *ngIf="notifications$ | async as notifs">
+  <div class="toast-container" *ngIf="notifs.length">
+    <div
+      *ngFor="let n of notifs"
+      class="toast-card"
+      [ngClass]="'toast-' + n.type"
+    >
+      <!-- Icono redondo -->
+      <div class="toast-icon">
+        <ion-icon [name]="iconFor(n.type)"></ion-icon>
+      </div>
+
+      <!-- Texto -->
+      <div class="toast-text">
+        <div class="toast-title">
+          {{ n.title }}
+        </div>
+        <div
+          class="toast-message"
+          *ngIf="n.message"
+        >
+          {{ n.message }}
+        </div>
+      </div>
+
+      <!-- Botón cerrar -->
+      <button
+        type="button"
+        class="toast-close"
+        (click)="dismiss(n.id)"
+      >
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+</ng-container>

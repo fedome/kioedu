@@ -1,0 +1,104 @@
+<ion-content [fullscreen]="true">
+  <div class="login-page">
+
+    <!-- VISTA 1: ONBOARDING / BIENVENIDA -->
+    <div class="onboarding-wrapper" *ngIf="showOnboarding">
+      <div class="on-top-bar">
+        <div class="brand">
+          <ion-icon name="school-outline"></ion-icon>
+          <span>KioEdu</span>
+        </div>
+        <div class="user-role">PADRES</div>
+      </div>
+
+      <div class="illustration-container">
+        <div class="hero-logo-wrap">
+          <img src="assets/assets/Logo/LogoKioEduSinFondo.svg" alt="KioEdu Logo" class="hero-logo">
+        </div>
+      </div>
+
+      <div class="text-content">
+        <h1 class="main-title">Gestioná el kiosco <br> de tus hijos</h1>
+        <p class="main-subtitle">
+          Controlá el saldo, revisá consumos y recargá de forma segura en segundos.
+        </p>
+      </div>
+
+      <div class="onboarding-actions">
+        <ion-button expand="block" class="pill-button btn-primary" (click)="startLogin()">
+          Iniciar sesión
+        </ion-button>
+        <ion-button expand="block" fill="outline" class="pill-button btn-outline" (click)="GoToRegister()">
+          Crear cuenta
+        </ion-button>
+      </div>
+
+      <div class="trust-badges">
+        <div class="badge-item">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <span>100% SEGURO</span>
+        </div>
+        <div class="badge-item">
+          <ion-icon name="flash-outline"></ion-icon>
+          <span>INSTANTÁNEO</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA 2: FORMULARIO DE LOGIN -->
+    <div class="login-wrapper" *ngIf="!showOnboarding">
+      <div class="login-header">
+        <ion-button fill="clear" class="back-btn" (click)="cancelLogin()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <img src="assets/assets/Logo/LogoKioEduSinFondo.svg" alt="KioEdu" class="logo-small" />
+      </div>
+
+      <div class="login-content">
+        <div class="welcome-text">
+          <h2 class="card-title">Bienvenido</h2>
+          <p class="card-subtitle">Ingresá tus datos para continuar</p>
+        </div>
+
+        <div class="login-card rounded-card">
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="mail-outline"></ion-icon>
+              <ion-input type="email" placeholder="Email" formControlName="email">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+              <ion-input [type]="passwordVisible ? 'text' : 'password'" placeholder="Contraseña"
+                formControlName="password">
+              </ion-input>
+              <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()" class="eye-btn">
+                <ion-icon [name]="passwordVisible ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <div class="forgot-row">
+              <button type="button" class="link-button" (click)="ForgotPassword()">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+
+            <ion-button expand="block" type="submit" class="pill-button btn-primary login-submit"
+              [disabled]="loginForm.invalid">
+              Entrar
+            </ion-button>
+          </form>
+
+          <div class="signup-block">
+            <span>¿No tenés cuenta?</span>
+            <button type="button" class="link-button" (click)="GoToRegister()">
+              Registrate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

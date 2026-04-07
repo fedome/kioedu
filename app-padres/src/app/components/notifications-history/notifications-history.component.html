@@ -1,0 +1,112 @@
+<ion-header class="dashboard-header ion-no-border">
+  <ion-toolbar class="dashboard-toolbar">
+
+    <!-- Back a la pantalla anterior (settings o donde quieras) -->
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/settings"></ion-back-button>
+    </ion-buttons>
+
+    <!-- Título centrado como en el resto -->
+    <ion-title class="header-title-center">
+      <div class="header-title">
+        <span class="header-kicker">Centro de notificaciones</span>
+        <span class="header-main">Notificaciones</span>
+      </div>
+    </ion-title>
+
+    <!-- Ícono decorativo a la derecha -->
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="markAllAsRead()" *ngIf="unreadCount > 0" class="btn-mark-all">
+        <ion-label>Leer todas</ion-label>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="notifications-page">
+
+  <div class="notifications-wrapper ion-padding-horizontal">
+
+    <!-- Estado general -->
+    <div class="notifications-status">
+      <ion-icon name="notifications-outline"></ion-icon>
+      <div class="text">
+        <div class="title">
+          Centro de notificaciones
+        </div>
+        <div class="subtitle" *ngIf="unreadCount === 0">
+          Todo al día
+        </div>
+        <div class="subtitle" *ngIf="unreadCount > 0">
+          Tenés {{ unreadCount }} notificación{{ unreadCount > 1 ? 'es' : '' }} sin leer
+        </div>
+      </div>
+    </div>
+
+    <!-- Segmento -->
+    <ion-segment
+      [value]="segment"
+      (ionChange)="onSegmentChange($event)"
+      class="notifications-segment"
+    >
+      <ion-segment-button value="ALL">
+        <ion-label>Todo</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="ACCOUNT">
+        <ion-label>Cuenta</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="NEWS">
+        <ion-label>Noticias</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <!-- Lista de notificaciones -->
+    <div *ngIf="filteredNotifications.length; else emptyState"
+         class="notifications-list-pro">
+ 
+      <div
+        class="notif-card-pro"
+        *ngFor="let n of filteredNotifications"
+        [class.unread]="!n.read"
+        (click)="markAsRead(n)"
+      >
+        <div class="card-glow" *ngIf="!n.read"></div>
+        
+        <div class="notif-icon-round" [ngClass]="'kind-' + n.kind">
+          <ion-icon [name]="iconFor(n)"></ion-icon>
+        </div>
+ 
+        <div class="notif-body">
+          <div class="notif-header-pro">
+            <span class="notif-pill-pro">{{ pillLabel(n) }}</span>
+            <span class="notif-time">{{ n.createdAt | date:'shortTime' }}</span>
+          </div>
+ 
+          <div class="notif-title-pro">{{ n.title }}</div>
+          <div class="notif-message-pro">{{ n.message }}</div>
+          
+          <div class="notif-actions" *ngIf="!n.read">
+            <span class="action-hint">Tocar para leer</span>
+          </div>
+        </div>
+        
+        <div class="unread-dot" *ngIf="!n.read"></div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-emoji">🔔</div>
+        <div class="empty-title">Sin notificaciones</div>
+        <div class="empty-text">
+          Cuando haya movimientos o alertas, las vas a ver acá.
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+</ion-content>

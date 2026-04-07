@@ -1,0 +1,25 @@
+<div class="modal-root">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>¿A quién querés cargarle saldo?</h2>
+    </div>
+    
+    <div class="children-list">
+      <div class="child-item" *ngFor="let child of children" (click)="selectChild(child)">
+        <div class="child-avatar">
+          {{ child.firstName[0] }}{{ child.lastName[0] }}
+        </div>
+        <div class="child-name">
+          {{ child.firstName }} {{ child.lastName }}
+        </div>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </div>
+    </div>
+  
+    <div class="modal-footer">
+      <ion-button fill="clear" (click)="dismiss()" class="btn-cancel">
+        Cancelar
+      </ion-button>
+    </div>
+  </div>
+</div>

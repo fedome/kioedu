@@ -1,0 +1,74 @@
+<div class="user-list-container">
+    <header class="list-header">
+        <div class="title-section">
+            <h1>Roles del Sistema</h1>
+            <p>Define los niveles de acceso y permisos asociados a cada función.</p>
+        </div>
+        <div class="actions">
+            <button class="btn-primary" (click)="createRole()">
+                <lucide-angular [img]="PlusIcon" class="w-4 h-4 mr-2"></lucide-angular> Nuevo Rol
+            </button>
+        </div>
+    </header>
+
+    <div class="list-card">
+        <div class="table-responsive">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nombre del Rol</th>
+                        <th>Descripción</th>
+                        <th>Permisos</th>
+                        <th class="text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isLoading()) {
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="loader">Cargando roles...</div>
+                        </td>
+                    </tr>
+                    } @else if (roles().length === 0) {
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <p>No hay roles definidos.</p>
+                        </td>
+                    </tr>
+                    } @else {
+                    @for (role of roles(); track role.id) {
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <span class="user-name">{{ role.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ role.description || 'Sin descripción' }}</td>
+                        <td>
+                            <div class="roles-badges">
+                                <span class="badge info">
+                                    {{ role.permissions.length || 0 }} permisos
+                                </span>
+                            </div>
+                        </td>
+                        <td class="text-right actions-cell">
+                            <button class="btn-icon" (click)="editRole(role)" title="Editar">
+                                <lucide-angular [img]="EditIcon" class="w-5 h-5"></lucide-angular>
+                            </button>
+                            <!-- Solo permitir borrar si no es un rol crítico del sistema -->
+                            @if (role.name !== 'ADMIN' && role.name !== 'PARENT') {
+                            <button class="btn-icon danger" (click)="deleteRole(role)" title="Eliminar">
+                                <lucide-angular [img]="TrashIcon" class="w-5 h-5"></lucide-angular>
+                            </button>
+                            }
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<app-role-form-modal [isOpen]="isModalOpen()" [role]="selectedRole()" (close)="closeModal()" (saved)="loadRoles()" />

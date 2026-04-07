@@ -1,0 +1,75 @@
+<ion-content [fullscreen]="true">
+  <div class="login-page">
+
+    <div class="login-wrapper">
+      <!-- HEADER BACK -->
+      <div class="login-header">
+        <ion-button fill="clear" class="back-btn" (click)="goToLogin()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </ion-button>
+        <img src="assets/assets/Logo/LogoKioEduSinFondo.svg" alt="KioEdu" class="logo-small" />
+      </div>
+
+      <div class="login-content">
+        <div class="welcome-text">
+          <h2 class="card-title">Crear cuenta</h2>
+          <p class="card-subtitle">Unite a la red de kioscos inteligentes</p>
+        </div>
+
+        <div class="login-card rounded-card">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="person-outline"></ion-icon>
+              <ion-input placeholder="Nombre y apellido" formControlName="fullName">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="mail-outline"></ion-icon>
+              <ion-input type="email" placeholder="Email" formControlName="email">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+              <ion-input [type]="passwordVisible ? 'text' : 'password'" placeholder="Contraseña"
+                formControlName="password">
+              </ion-input>
+              <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()" class="eye-btn">
+                <ion-icon [name]="passwordVisible ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <ion-item lines="none" class="mk-input">
+              <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+              <ion-input [type]="confirmPasswordVisible ? 'text' : 'password'" placeholder="Repetir contraseña"
+                formControlName="confirmPassword">
+              </ion-input>
+              <ion-button fill="clear" slot="end" (click)="toggleConfirmPasswordVisibility()" class="eye-btn">
+                <ion-icon [name]="confirmPasswordVisible ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
+            </ion-item>
+
+            <div class="error-row" *ngIf="form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched">
+              <span class="error-text">Las contraseñas no coinciden</span>
+            </div>
+
+            <ion-button expand="block" type="submit" class="pill-button btn-primary login-submit"
+              [disabled]="form.invalid">
+              Registrarme
+            </ion-button>
+          </form>
+
+          <div class="signup-block">
+            <span>¿Ya tenés cuenta?</span>
+            <button type="button" class="link-button" (click)="goToLogin()">
+              Iniciá sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

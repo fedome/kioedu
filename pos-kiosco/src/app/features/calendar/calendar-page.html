@@ -1,0 +1,127 @@
+<div class="space-y-6 h-full flex flex-col">
+    <!-- Header -->
+    <div
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Calendario</h2>
+            <p class="text-slate-500">Planificación mensual.</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-wrap items-center gap-4">
+
+            <!-- Filters Toggle Style -->
+            <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                <button (click)="showVisits.set(!showVisits())"
+                    class="px-3 py-1 rounded-lg text-sm font-bold transition-all" [class.bg-indigo-100]="showVisits()"
+                    [class.text-indigo-700]="showVisits()" [class.text-slate-400]="!showVisits()"
+                    [class.hover:bg-slate-200]="!showVisits()">
+                    Visitas
+                </button>
+                <div class="w-px h-4 bg-slate-300"></div>
+                <button (click)="showCustom.set(!showCustom())"
+                    class="px-3 py-1 rounded-lg text-sm font-bold transition-all" [class.bg-emerald-100]="showCustom()"
+                    [class.text-emerald-700]="showCustom()" [class.text-slate-400]="!showCustom()"
+                    [class.hover:bg-slate-200]="!showCustom()">
+                    Notas
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex items-center gap-2">
+                <button (click)="goToToday()"
+                    class="bg-indigo-50 text-indigo-600 px-3 py-2 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all border border-indigo-100 flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Ir a Hoy
+                </button>
+                <select [ngModel]="currentMonth()" (ngModelChange)="setMonth($event)"
+                    class="px-2 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer">
+                    @for (m of months; track $index) {
+                    <option [value]="$index">{{ m }}</option>
+                    }
+                </select>
+                <select [ngModel]="currentYear()" (ngModelChange)="setYear($event)"
+                    class="px-2 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-bold outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all cursor-pointer">
+                    @for (y of years; track y) {
+                    <option [value]="y">{{ y }}</option>
+                    }
+                </select>
+            </div>
+
+            <button (click)="openAddModal(today.getDate())"
+                class="bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all transform hover:scale-105 active:scale-95"
+                title="Agregar Nota Hoy">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar Grid (Month View) -->
+    <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col select-none">
+
+        <!-- Weekdays Header -->
+        <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Lun</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Mar</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Mié</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Jue</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Vie</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Sáb</div>
+            <div class="py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Dom</div>
+        </div>
+
+        <!-- Days Grid -->
+        <div class="grid grid-cols-7 flex-1 auto-rows-fr overflow-y-auto bg-slate-50/50">
+            <!-- Empty Padding Days -->
+            @for (i of [].constructor(calendarDays().paddingDays); track $index) {
+            <div class="bg-slate-50/30 border-b border-r border-slate-100 min-h-[120px]"></div>
+            }
+
+            <!-- Actual Days -->
+            @for (_ of [].constructor(calendarDays().daysInMonth); track $index) {
+            <div class="bg-white border-b border-r border-slate-100 p-2 min-h-[120px] relative hover:bg-indigo-50/30 transition-colors group flex flex-col gap-1 cursor-pointer"
+                [class.bg-indigo-50/20]="isToday($index + 1)" [class.ring-2]="isToday($index + 1)"
+                [class.ring-inset]="isToday($index + 1)" [class.ring-indigo-600]="isToday($index + 1)"
+                [style.z-index]="isToday($index + 1) ? '10' : '1'" (click)="openAddModal($index + 1, $event)">
+
+                <div class="flex justify-between items-start">
+                    <span
+                        class="text-sm font-bold w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+                        [class.bg-indigo-600]="isToday($index + 1)" [class.text-white]="isToday($index + 1)"
+                        [class.text-slate-700]="!isToday($index + 1)">
+                        {{ $index + 1 }}
+                    </span>
+
+                    <!-- Mini Add Button (visible on hover) -->
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Events List -->
+                <div class="space-y-1 flex-1">
+                    @for (event of getEventsForDay($index + 1); track $index) {
+                    <div class="px-2 py-1 rounded-lg text-xs font-semibold truncate transition-all transform hover:scale-[1.02] border"
+                        [ngClass]="event.color" [title]="event.title" (click)="openEventDetails(event, $event)">
+                        {{ event.title }}
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+@if (isModalOpen) {
+<app-calendar-event-modal [date]="selectedDate" [event]="selectedEvent" (close)="closeModal()"
+    (saveEvent)="handleSaveEvent($event)" (deleteEvent)="handleDeleteEvent()" />
+}

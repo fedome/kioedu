@@ -1,0 +1,54 @@
+<div class="modal-root">
+  <ion-card class="modal-card">
+    <ion-card-content>
+
+      <h2 class="modal-title">Límite diario</h2>
+      <p class="modal-subtitle">
+        Definí cuánto puede gastar por día {{ child.firstName }} {{ child.lastName }} en el kiosco.
+      </p>
+
+      <div class="current-limit">
+        <ng-container *ngIf="child.dailyLimit?.limitCents as limit; else noLimit">
+          Límite actual:
+          <strong>
+            $ {{ limit / 100 | number:'1.0-0' }} / día
+          </strong>
+        </ng-container>
+
+        <ng-template #noLimit>
+          <span class="no-limit-text">Actualmente no tiene límite diario.</span>
+        </ng-template>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <ion-input
+          label="Nuevo límite diario (ARS)"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="limit"
+          type="text"
+          inputmode="decimal"
+          class="ion-margin-bottom"
+          (ionInput)="onLimitInput($event)">
+        </ion-input>
+
+        <p class="helper-text">
+          Para dejar sin límite, podés borrar el valor y guardar.
+        </p>
+
+        <ion-button
+          expand="block"
+          color="primary"
+          type="submit"
+          class="confirm-button">
+          Guardar límite
+        </ion-button>
+
+        <ion-button fill="clear" expand="block" color="danger" (click)="cancel()" class="cancel-btn">
+          CANCELAR
+        </ion-button>
+      </form>
+
+    </ion-card-content>
+  </ion-card>
+</div>

@@ -1,0 +1,24 @@
+/* src/app/pages/terms/terms.page.scss */
+:host {
+  ion-content {
+    --background: linear-gradient(180deg, #f3f5fb 0%, #e9ecf6 40%, #f8f9ff 100%);
+  }
+}
+
+.legal-wrapper {
+  padding-bottom: 32px;
+
+  h2 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  p {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    color: #4b5563;
+  }
+}

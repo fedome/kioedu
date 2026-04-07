@@ -1,0 +1,91 @@
+<div
+    class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center z-[110] p-4 animate-in fade-in duration-300">
+    <div
+        class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-slate-100">
+
+        <!-- Header -->
+        <div class="bg-indigo-600 px-8 py-6 text-white relative">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                    <lucide-angular [img]="ShieldIcon" class="w-6 h-6"></lucide-angular>
+                </div>
+                <div>
+                    <h2 class="text-xl font-black">Reconciliación</h2>
+                    <p class="text-indigo-100 text-xs font-medium uppercase tracking-widest mt-0.5">Control de
+                        Inventario Físico</p>
+                </div>
+            </div>
+            <button (click)="cancel.emit()"
+                class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-8 space-y-6">
+            <!-- Product Info Card -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Producto</p>
+                    <p class="font-bold text-slate-700">{{ product?.name }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Stock Sistema</p>
+                    <p class="font-black text-indigo-600 text-lg">{{ product?.stockQuantity }} u.</p>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1">Stock Real
+                        en Estantería</label>
+                    <div class="relative group">
+                        <input type="number" [(ngModel)]="physicalStock"
+                            class="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-3xl font-black text-center text-slate-800 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:shadow-xl focus:shadow-indigo-500/10 placeholder:text-slate-200"
+                            placeholder="0" autofocus>
+                        <div
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none group-focus-within:text-indigo-200 transition-colors">
+                            <lucide-angular [img]="AlertIcon" class="w-6 h-6"></lucide-angular>
+                        </div>
+                    </div>
+                </div>
+
+                @if (physicalStock !== null) {
+                <div
+                    class="flex items-center justify-center gap-3 py-2 bg-indigo-50/50 rounded-xl border border-indigo-100/30 animate-in slide-in-from-top-2 duration-300">
+                    <p class="text-xs font-medium text-slate-500">Diferencia detectada:</p>
+                    <span class="font-black text-sm"
+                        [ngClass]="(physicalStock - product?.stockQuantity) >= 0 ? 'text-emerald-500' : 'text-red-500'">
+                        {{ (physicalStock - product?.stockQuantity) > 0 ? '+' : '' }}{{ (physicalStock -
+                        product?.stockQuantity) }} unidades
+                    </span>
+                </div>
+                }
+
+                <div>
+                    <label
+                        class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1">Observaciones
+                        / Motivo</label>
+                    <textarea [(ngModel)]="reason" rows="2"
+                        class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm resize-none outline-none focus:border-indigo-500 transition-all placeholder:text-slate-400"
+                        placeholder="Ej: Rotura, error de conteo anterior..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 bg-slate-50/50 border-t border-slate-100 flex gap-4">
+            <button (click)="cancel.emit()"
+                class="flex-1 py-4 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">
+                Cancelar
+            </button>
+            <button (click)="submit()" [disabled]="loading() || physicalStock === null"
+                class="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-indigo-200 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-3 active:scale-[0.98]">
+                <span *ngIf="loading()"
+                    class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                {{ loading() ? 'PROCESANDO...' : 'GUARDAR AJUSTE' }}
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,340 @@
+.topup-modal-container {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border: 1px solid var(--mk-card-border);
+}
+
+.modal-head {
+  text-align: center;
+
+  .title {
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--mk-text-main);
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--mk-text-subtle);
+
+    strong {
+      color: var(--mk-text-main);
+    }
+  }
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* QUICK SELECT PILLS */
+.amount-pills {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .amount-pill {
+    flex: 1;
+    min-width: 90px;
+    height: 52px;
+    border-radius: 16px;
+    border: 1px solid var(--mk-card-border);
+    background: var(--mk-input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    span {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--mk-text-main);
+    }
+
+    &.selected {
+      border-color: var(--ion-color-primary);
+      background: var(--ion-color-primary);
+
+      span {
+        color: #fff;
+      }
+
+      box-shadow: 0 8px 16px rgba(1, 104, 83, 0.2);
+    }
+  }
+}
+
+/* FORM SECTIONS */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--mk-text-subtle);
+  }
+}
+
+.custom-input-item {
+  --background: var(--mk-input-bg);
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  height: 64px;
+  border: 1px solid var(--mk-input-border);
+  border-radius: 16px;
+
+  .currency-symbol {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--mk-text-main);
+    margin-right: 8px;
+  }
+
+  ion-input {
+    font-size: 1.25rem;
+    font-weight: 700;
+    --color: var(--mk-text-main);
+  }
+}
+
+/* METHODS LIST */
+.methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .method-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+
+    .method-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 14px;
+
+      ion-icon {
+        font-size: 1.5rem;
+      }
+    }
+
+    .method-name {
+      flex: 1;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--mk-text-main);
+    }
+
+    .radio-indicator {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .radio-inner {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--ion-color-primary);
+      }
+    }
+
+    &.selected {
+      border-color: var(--ion-color-primary);
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+
+      .radio-indicator {
+        border-color: var(--ion-color-primary);
+      }
+    }
+  }
+}
+
+/* FOOTER */
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .btn-cancel {
+    --color: var(--mk-text-subtle);
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+/* DARK MODE */
+:host-context(body.dark) {
+  .topup-modal-container {
+    background: var(--mk-modal-solid-bg);
+  }
+
+  .amount-pill {
+    background: #1e293b;
+    border-color: #334155;
+
+    span {
+      color: #e2e8f0;
+    }
+  }
+
+  .custom-input-item {
+    --background: #1e293b;
+  }
+
+  .method-item {
+    background: #1e293b;
+  }
+
+  .method-item.selected {
+    background: #0f172a;
+  }
+
+  .radio-indicator {
+    border-color: #475569;
+  }
+
+  .ticket-card {
+    background: #1e293b;
+    border-color: #334155;
+    .ticket-row .ref-code {
+      background: #334155;
+    }
+    .ticket-divider {
+      background: #334155;
+    }
+  }
+  .ticket-instructions {
+    background: #0f172a;
+    p {
+      color: #94a3b8;
+    }
+  }
+}
+
+/* TICKET VIEW */
+.ticket-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0;
+
+  .success-icon-wrap {
+    font-size: 5rem;
+    margin-bottom: 16px;
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .ticket-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: var(--mk-text-main);
+  }
+
+  .ticket-subtitle {
+    font-size: 0.95rem;
+    color: var(--mk-text-subtle);
+    margin: 0 0 24px;
+    line-height: 1.4;
+  }
+
+  .ticket-card {
+    width: 100%;
+    padding: 20px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--mk-text-subtle);
+      }
+
+      .value {
+        font-weight: 700;
+        color: var(--mk-text-main);
+      }
+
+      .main-value {
+        font-size: 1.25rem;
+        color: var(--ion-color-success);
+      }
+
+      .ref-code {
+        font-family: monospace;
+        letter-spacing: 1px;
+        background: #e2e8f0;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+    }
+
+    .ticket-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 4px 0;
+    }
+  }
+
+  .ticket-instructions {
+    text-align: left;
+    background: #f1f5f9;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 28px;
+    width: 100%;
+
+    p {
+      margin: 6px 0;
+      font-size: 0.9rem;
+      color: #475569;
+      font-weight: 500;
+    }
+  }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

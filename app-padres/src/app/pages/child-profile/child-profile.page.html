@@ -1,0 +1,246 @@
+<ion-header class="dashboard-header ion-no-border">
+  <ion-toolbar class="dashboard-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title></ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="profile-options-trigger">
+        <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<!-- Popover de Opciones -->
+<ion-popover trigger="profile-options-trigger" [dismissOnSelect]="true" mode="ios">
+  <ng-template>
+    <ion-list lines="none" class="ion-no-padding">
+      <ion-item button (click)="updateChildDetails()">
+        <ion-icon name="pencil-outline" slot="start"></ion-icon>
+        <ion-label>Editar Datos</ion-label>
+      </ion-item>
+      <ion-item button (click)="reportLostCard()" *ngIf="child?.card" color="warning">
+        <ion-icon name="alert-circle-outline" slot="start" color="warning"></ion-icon>
+        <ion-label color="warning">Tarjeta Perdida</ion-label>
+      </ion-item>
+      <ion-item button lines="none" (click)="deleteChild()" class="delete-item">
+        <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">Eliminar Alumno</ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+</ion-popover>
+
+<ion-content [fullscreen]="true" class="child-profile-page">
+  <div class="activity-wrapper ion-padding" *ngIf="child">
+
+    <!-- Header / Avatar -->
+    <div class="profile-main-card">
+      <div class="avatar-container">
+        <div class="avatar-ring">
+          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Avatar" />
+        </div>
+      </div>
+      
+      <div class="profile-info-column">
+        <h2 class="child-full-name">{{ child.firstName }} {{ child.lastName }}</h2>
+        <div class="balance-pill">
+          <ion-icon name="wallet-outline"></ion-icon>
+          <span>Saldo: $ {{ (child.accounts?.[0]?.balanceCents || 0) / 100 | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <ion-button expand="block" class="pill-button btn-recharge-full" (click)="openRecharge($event)">
+          Cargar Saldo
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- PENDING TICKET ALERTS (all) -->
+    <div class="pending-ticket-banner" *ngFor="let topup of pendingTopups" style="margin-bottom: 10px;">
+      <div class="banner-main" (click)="viewPendingTicket(topup)">
+        <div class="banner-icon">
+          <ion-icon name="receipt-outline"></ion-icon>
+        </div>
+        <div class="banner-text">
+          <strong>Recarga Pendiente (Efectivo)</strong>
+          <p>Recarga de $ {{ topup.amountCents / 100 | number:'1.0-0' }} pendiente. Tocá para ver el ticket.</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="chevron-end"></ion-icon>
+      </div>
+      <div class="banner-cancel-btn" (click)="cancelPendingTopup($event, topup)">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
+    </div>
+
+    <!-- Panel de Control Premium -->
+    <div class="control-panel-airy">
+      <h3 class="panel-section-title">Ajustes de Cuenta</h3>
+
+      <!-- Daily Limit Interactive Card -->
+      <div class="control-card-premium" (click)="updateDailyLimit()" style="margin-bottom: 12px;">
+        <div class="card-body">
+          <div class="icon-box bg-blue-soft">
+            <ion-icon name="card-outline"></ion-icon>
+          </div>
+          <div class="text-content">
+            <strong>Límite Diario de Gasto</strong>
+            <p>Tope máximo permitido por día</p>
+          </div>
+          <div class="value-and-edit">
+            <span class="limit-value">$ {{ (child.dailyLimit?.limitCents || 0) / 100 | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lock Card Interactive Card -->
+      <div class="control-card-premium" (click)="toggleCardBlock()" *ngIf="child.card" style="margin-bottom: 12px;">
+        <div class="card-body">
+          <div class="icon-box" [ngClass]="child.card.isBlocked ? 'bg-red-soft' : 'bg-green-soft'">
+            <ion-icon [name]="child.card.isBlocked ? 'lock-closed-outline' : 'lock-open-outline'"></ion-icon>
+          </div>
+          <div class="text-content">
+            <strong>{{ child.card.isBlocked ? 'Desbloquear Credencial' : 'Bloquear Credencial' }}</strong>
+            <p>{{ child.card.isBlocked ? 'La pulsera no puede ser utilizada' : 'La pulsera está activa y lista' }}</p>
+          </div>
+          <div class="value-and-edit">
+            <ion-icon name="chevron-forward-outline" class="edit-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Perdida Button -->
+      <div class="control-card-premium" (click)="reportLostCard()" *ngIf="child.card">
+        <div class="card-body">
+          <div class="icon-box bg-orange-soft">
+            <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
+          </div>
+          <div class="text-content">
+            <strong>Informar Tarjeta Perdida</strong>
+            <p>Bloquear credencial definitivamente por pérdida o robo</p>
+          </div>
+          <div class="value-and-edit">
+            <ion-icon name="chevron-forward-outline" class="edit-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Spending Summary Section ───────────── -->
+    <div class="section-spacer"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+      <h3 class="panel-section-title" style="margin: 0;">Resumen de Gastos</h3>
+      <div style="display: flex; gap: 6px;">
+        <ion-button size="small" [fill]="summaryDays === 7 ? 'solid' : 'outline'" color="primary" (click)="changeSummaryPeriod(7)" style="--border-radius: 20px; font-size: 0.7rem;">7d</ion-button>
+        <ion-button size="small" [fill]="summaryDays === 15 ? 'solid' : 'outline'" color="primary" (click)="changeSummaryPeriod(15)" style="--border-radius: 20px; font-size: 0.7rem;">15d</ion-button>
+        <ion-button size="small" [fill]="summaryDays === 30 ? 'solid' : 'outline'" color="primary" (click)="changeSummaryPeriod(30)" style="--border-radius: 20px; font-size: 0.7rem;">30d</ion-button>
+      </div>
+    </div>
+
+    <div class="summary-card" *ngIf="spendingSummary">
+      <div class="summary-header">
+        <div>
+          <span class="summary-label">Total gastado</span>
+          <h2 class="summary-total">$ {{ spendingSummary.totalCents / 100 | number:'1.0-0' }}</h2>
+        </div>
+        <span class="summary-count">{{ spendingSummary.transactionCount }} compras</span>
+      </div>
+
+      <div class="category-bars" *ngIf="spendingSummary.categories.length > 0">
+        <div class="category-bar-item" *ngFor="let cat of spendingSummary.categories; let i = index">
+          <div class="cat-info">
+            <span class="cat-dot" [style.background]="getCategoryColor(i)"></span>
+            <span class="cat-name">{{ cat.name }}</span>
+            <span class="cat-amount">$ {{ cat.totalCents / 100 | number:'1.0-0' }}</span>
+          </div>
+          <div class="cat-bar-track">
+            <div class="cat-bar-fill" 
+              [style.width.%]="spendingSummary!.totalCents > 0 ? (cat.totalCents / spendingSummary!.totalCents * 100) : 0"
+              [style.background]="getCategoryColor(i)"></div>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="spendingSummary.categories.length === 0" style="text-align: center; color: var(--mk-text-subtle); font-size: 0.85rem; margin: 16px 0 0;">
+        No hay gastos en los últimos {{ summaryDays }} días.
+      </p>
+    </div>
+
+    <!-- ── Card Events Timeline ──────────────── -->
+    <div class="section-spacer" *ngIf="cardEvents.length > 0"></div>
+    <h3 class="panel-section-title" *ngIf="cardEvents.length > 0">Historial de Tarjeta</h3>
+
+    <div class="timeline-card" *ngIf="cardEvents.length > 0">
+      <div class="timeline-item" *ngFor="let ev of cardEvents; let last = last" [class.last]="last">
+        <div class="timeline-dot">
+          <ion-icon [name]="getEventIcon(ev.event)"></ion-icon>
+        </div>
+        <div class="timeline-content">
+          <strong>{{ getEventLabel(ev.event) }}</strong>
+          <p *ngIf="ev.reason">{{ ev.reason }}</p>
+          <span class="timeline-date">{{ ev.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-spacer" style="height: 24px;"></div>
+    <h3 class="panel-section-title" style="margin-top: 8px;">Actividad Reciente</h3>
+
+    <!-- Recent Activity List -->
+    <div class="recent-activity-list" *ngIf="recentActivity.length > 0; else noRecentActivity">
+      <div class="movement-group-card rounded-card">
+        <div class="activity-item-div" *ngFor="let m of recentActivity; let last = last" 
+          [class.no-border]="last" [class.pending-item]="m.status === 'PENDING'" (click)="openDetail(m)">
+          <div class="activity-icon" [class.bg-orange]="isDebit(m)" [class.bg-green]="!isDebit(m)">
+            <ion-icon [name]="isDebit(m) ? 'fast-food-outline' : 'card-outline'"></ion-icon>
+          </div>
+
+          <div class="movement-info">
+            <div class="top-row">
+              <span class="item-name">
+                {{ m.paymentMethod === 'TRANSFER' 
+                   ? (isDebit(m) ? 'Transferencia enviada' : 'Transferencia recibida') 
+                   : (isDebit(m) ? m.description || 'Consumo Kiosco' : 'Recarga de Saldo') }}
+              </span>
+              <span class="amount" [class.debit]="isDebit(m)" [class.credit]="!isDebit(m)">
+                {{ getAmountSign(m) }}
+                $ {{ m.amountCents / 100 | number: '1.2-2' }}
+              </span>
+            </div>
+
+            <div class="mid-row">
+              <span class="activity-status-badge pending" *ngIf="m.status === 'PENDING'">
+                Pendiente
+              </span>
+              <span class="date">
+                {{ m.createdAt | date: 'shortTime' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noRecentActivity>
+      <div class="empty-state">
+        <p>No hay actividad reciente para este hijo.</p>
+      </div>
+    </ng-template>
+
+    <ion-button fill="clear" expand="block" color="primary" [routerLink]="['/tabs/activity', child.id]" class="view-all-link">
+      Ver todo el historial
+    </ion-button>
+
+  </div>
+
+  <!-- Skeleton loading -->
+  <div class="activity-wrapper ion-padding" *ngIf="loading && !child">
+    <div class="profile-main-card skeleton">
+      <ion-skeleton-text animated style="width: 100%; height: 200px; border-radius: 24px;"></ion-skeleton-text>
+    </div>
+  </div>
+</ion-content>

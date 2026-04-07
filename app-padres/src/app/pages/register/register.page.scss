@@ -1,0 +1,114 @@
+:host {
+  ion-content {
+    --background: var(--mk-page-bg);
+  }
+}
+
+.login-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 24px;
+}
+
+.login-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  .back-btn {
+    position: absolute;
+    left: -12px;
+    --color: var(--mk-text-main);
+    font-size: 1.4rem;
+  }
+
+  .logo-small {
+    height: 48px;
+    object-fit: contain;
+  }
+}
+
+.login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 40px;
+}
+
+.welcome-text {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .card-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--mk-text-main);
+    letter-spacing: -0.5px;
+  }
+
+  .card-subtitle {
+    font-size: 1.05rem;
+    color: var(--mk-text-subtle);
+  }
+}
+
+.login-card {
+  margin-top: 0;
+}
+
+.error-row {
+  margin: 4px 2px 16px;
+}
+
+.error-text {
+  font-size: 0.8rem;
+  color: #fb7185;
+  font-weight: 500;
+}
+
+.login-submit {
+  margin-top: 8px;
+}
+
+.eye-btn {
+  --color: var(--mk-text-subtle);
+  margin-right: -4px;
+}
+
+.signup-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  margin-top: 24px;
+  color: var(--mk-text-subtle);
+}
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ion-color-secondary);
+  text-decoration: none;
+}
+
+/* Buttons */
+.btn-primary {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+}

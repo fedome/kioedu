@@ -1,0 +1,6 @@
+{
+    "apiBaseUrl": "http://localhost:3000/api/v1",
+    "kioskApiKey": "KIOSK_DEMO_KEY_123",
+    "kioskId": 1,
+    "geminiApiKey": ""
+}

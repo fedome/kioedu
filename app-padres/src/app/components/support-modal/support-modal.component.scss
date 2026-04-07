@@ -1,0 +1,66 @@
+.modal-root {
+  padding: 16px;
+}
+
+.modal-card {
+  border-radius: 20px;
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.25);
+  background: var(--mk-card-bg, #ffffff);
+}
+
+.modal-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--mk-text-main, #111827);
+  margin: 0 0 4px;
+}
+
+.modal-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--mk-text-subtle, #6b7280);
+  margin: 0 0 14px;
+}
+
+/* Inputs estilo "Agregar hijo" */
+.input-rounded {
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.filter-item {
+  --background: transparent;
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 10px;
+}
+
+.support-form {
+  ion-textarea {
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+}
+
+.error-text {
+  font-size: 0.8rem;
+  margin: 2px 0 8px;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  ion-button {
+    --border-radius: 999px;
+  }
+}
+
+/* Dark mode */
+body.dark .modal-card {
+  background: var(--mk-card-bg, #020617);
+}

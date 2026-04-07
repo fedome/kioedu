@@ -1,0 +1,33 @@
+<div class="modal-root">
+  <ion-card class="modal-card">
+    <ion-card-content>
+
+      <div class="icon-wrapper">
+        <ion-icon name="trash-outline"></ion-icon>
+      </div>
+
+      <h2 class="modal-title">Eliminar hijo</h2>
+
+      <p class="modal-subtitle">
+        ¿Seguro que querés eliminar a
+        <strong>{{ child.firstName }} {{ child.lastName }}</strong>
+        de tu cuenta?
+      </p>
+
+      <p class="helper-text">
+        Esta acción es permanente. Los movimientos históricos
+        quedarán registrados, pero el alumno dejará de aparecer
+        en tu listado.
+      </p>
+
+      <ion-button expand="block" color="danger" (click)="confirm()" class="confirm-button">
+        Eliminar hijo
+      </ion-button>
+
+      <button type="button" class="cancel-link" (click)="cancel()">
+        Cancelar
+      </button>
+
+    </ion-card-content>
+  </ion-card>
+</div>

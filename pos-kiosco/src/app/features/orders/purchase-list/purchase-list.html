@@ -1,0 +1,146 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Lista de Compras</h2>
+            <p class="text-slate-500">Pedidos borradores listos para enviar a tus proveedores.</p>
+        </div>
+        <div>
+            <button (click)="openAddModal()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Agregar Manual
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-slate-200">
+        <button (click)="setFilter('DRAFT')" [class.border-indigo-600]="activeFilter() === 'DRAFT'"
+            [class.text-indigo-600]="activeFilter() === 'DRAFT'"
+            class="px-6 py-3 border-b-2 border-transparent font-bold text-sm transition-all">
+            Lista de Compras (Borradores)
+        </button>
+        <button (click)="setFilter('SUBMITTED')" [class.border-indigo-600]="activeFilter() === 'SUBMITTED'"
+            [class.text-indigo-600]="activeFilter() === 'SUBMITTED'"
+            class="px-6 py-3 border-b-2 border-transparent font-bold text-sm transition-all flex items-center gap-2">
+            Pedidos Enviados
+            @if (submittedCount() > 0) {
+            <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px]">
+                {{ submittedCount() }}
+            </span>
+            }
+        </button>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+    <div class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading() && filteredOrders().length === 0) {
+    <div class="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed">
+        <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-medium text-slate-900">
+            {{ activeFilter() === 'DRAFT' ? 'Tu lista está vacía' : 'No hay pedidos pendientes de entrega' }}
+        </h3>
+        <p class="text-slate-500 mb-6">
+            {{ activeFilter() === 'DRAFT' ? 'Los productos con bajo stock aparecerán aquí automáticamente.' : 'Los
+            pedidos enviados aparecerán aquí para registrar su recepción.' }}
+        </p>
+    </div>
+    }
+
+    <!-- Grid de Tarjetas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        @for (order of filteredOrders(); track order.id) {
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full group">
+            <!-- Card Header -->
+            <div class="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                        {{ order.supplier?.name?.charAt(0)?.toUpperCase() || 'P' }}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">{{ order.supplier?.name || 'Proveedor Desconocido' }}</h3>
+                        <p class="text-xs text-slate-500">{{ (order.items || []).length }} ítems</p>
+                    </div>
+                </div>
+
+                @if (order.status === 'DRAFT') {
+                <button (click)="openAddModal(order.supplierId)"
+                    class="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-full hover:bg-white/50"
+                    title="Agregar ítem manual">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+                }
+            </div>
+
+            <!-- Card Body (Items) -->
+            <div class="p-5 flex-1">
+                <ul class="space-y-3">
+                    @for (item of order.items || []; track item.id) {
+                    <li class="flex justify-between items-center text-sm">
+                        <span class="text-slate-700 font-medium truncate pr-2">{{ item.product?.name }}</span>
+                        <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold shrink-0">
+                            x{{ item.quantity }}
+                        </span>
+                    </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Card Footer (Actions) -->
+            <div class="p-5 pt-0 mt-auto space-y-2">
+                @if (order.status === 'DRAFT') {
+                @if (order.supplier?.phone) {
+                <a [href]="getWhatsappLink(order)" target="_blank" (click)="submitOrder(order.id)"
+                    class="flex items-center justify-center w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-medium">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.23-.298.347-.497.117-.198.059-.371-.03-.544-.089-.173-.806-1.94-1.104-2.659-.287-.694-.578-.6-.795-.611-.202-.009-.434-.012-.665-.012-.232 0-.61.087-.929.434-.319.347-1.22 1.192-1.22 2.909 0 1.716 1.249 3.374 1.423 3.61.174.235 2.463 3.759 5.967 5.271 2.336 1.008 2.811.808 3.307.758.852-.086 1.758-.718 2.006-1.411.248-.694.248-1.289.173-1.412-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.378-4.435 9.813-9.827 9.813" />
+                    </svg>
+                    Enviar por WhatsApp
+                </a>
+                }
+                <button (click)="submitOrder(order.id)"
+                    class="w-full px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium">
+                    Marcar como Enviado (Manual)
+                </button>
+                } @else if (order.status === 'SUBMITTED') {
+                <button (click)="openReceiveModal(order.id)"
+                    class="flex items-center justify-center w-full px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-bold">
+                    <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v1" />
+                    </svg>
+                    Confirmar Recepción
+                </button>
+                }
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+@if (showAddModal) {
+<app-add-to-draft-modal [preSelectedSupplierId]="selectedSupplierIdForAdd" (close)="closeAddModal()"
+    (add)="onAddItem($event)" />
+}
+
+@if (showReceiveModal && selectedOrderId) {
+<app-receive-order-modal [orderId]="selectedOrderId" (close)="closeReceiveModal()" (received)="closeReceiveModal()" />
+}

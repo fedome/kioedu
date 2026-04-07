@@ -1,0 +1,110 @@
+:host {
+  display: block;
+}
+
+/* Card principal del modal */
+.card-modal {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 16px 14px 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Título y subtítulo */
+.title {
+  text-align: center;
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--mk-text-main);
+}
+
+.subtitle {
+  text-align: center;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--mk-text-subtle);
+}
+
+/* Lista de opciones */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.option-card {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: var(--mk-surface-soft);
+  border-radius: 16px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.option-card:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+/* Iconos redondos */
+.icon-chip {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+/* Estos acentos se ven bien tanto en claro como en oscuro */
+.icon-chip.nfc {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.icon-chip.code {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.icon-chip.kiosk {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.option-text {
+  flex: 1;
+}
+
+.option-text h3 {
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mk-text-main);
+}
+
+.option-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--mk-text-subtle);
+}
+
+.chevron {
+  font-size: 1.2rem;
+  color: #9ca3af;
+}
+
+.close-button {
+  margin-top: 4px;
+  font-weight: 500;
+}

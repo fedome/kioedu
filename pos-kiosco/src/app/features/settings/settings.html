@@ -1,0 +1,374 @@
+<div class="max-w-4xl mx-auto p-6 space-y-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Configuración</h1>
+            <p class="text-sm text-slate-500">Ajustes del sistema POS</p>
+        </div>
+
+        <button (click)="saveSettings()"
+            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center gap-2">
+            @if (saved()) {
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Guardado
+            } @else {
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Guardar Cambios
+            }
+        </button>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex gap-6 border-b border-slate-200">
+        <button (click)="setActiveTab('profile')" [class.border-indigo-600]="activeTab() === 'profile'"
+            [class.text-indigo-600]="activeTab() === 'profile'" [class.border-transparent]="activeTab() !== 'profile'"
+            [class.text-slate-500]="activeTab() !== 'profile'"
+            class="pb-3 text-sm font-bold border-b-2 hover:text-indigo-600 transition-colors">
+            Perfil de Usuario
+        </button>
+        <button (click)="setActiveTab('system')" [class.border-indigo-600]="activeTab() === 'system'"
+            [class.text-indigo-600]="activeTab() === 'system'" [class.border-transparent]="activeTab() !== 'system'"
+            [class.text-slate-500]="activeTab() !== 'system'"
+            class="pb-3 text-sm font-bold border-b-2 hover:text-indigo-600 transition-colors">
+            Ajustes del Sistema
+        </button>
+        <button (click)="setActiveTab('arca')" [class.border-indigo-600]="activeTab() === 'arca'"
+            [class.text-indigo-600]="activeTab() === 'arca'" [class.border-transparent]="activeTab() !== 'arca'"
+            [class.text-slate-500]="activeTab() !== 'arca'"
+            class="pb-3 text-sm font-bold border-b-2 hover:text-indigo-600 transition-colors">
+            Facturación ARCA
+        </button>
+    </div>
+
+    <!-- TAB: PROFILE -->
+    @if (activeTab() === 'profile') {
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="font-bold text-slate-800">Mi Perfil</h2>
+                <p class="text-xs text-slate-500">Información del usuario actual</p>
+            </div>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Nombre Completo</label>
+                <input type="text" [value]="auth.currentUser()?.name || ''" disabled
+                    class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-600">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Correo Electrónico</label>
+                <input type="email" [value]="auth.currentUser()?.email || ''" disabled
+                    class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-600">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Rol en el Sistema</label>
+                <input type="text" [value]="auth.currentUser()?.roles?.join(', ') || 'Cajero'" disabled
+                    class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-600 font-medium">
+            </div>
+            <p class="text-xs text-slate-400 italic">(*) Para cambiar estos datos, contacta con un administrador
+                principal.</p>
+        </div>
+    </div>
+    }
+
+    <!-- TAB: SYSTEM -->
+    @if (activeTab() === 'system') {
+    <!-- Sección: Impresora de Tickets -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-800">Impresora de Tickets</h2>
+                    <p class="text-xs text-slate-500">Configura la impresora para tickets de venta</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div class="flex items-end gap-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Seleccionar Impresora</label>
+                    <select [(ngModel)]="formData.printerName"
+                        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-800 bg-white">
+                        <option value="">-- Impresora por defecto del sistema --</option>
+                        @for (printer of printers(); track printer.name) {
+                        <option [value]="printer.name">
+                            {{ printer.displayName }}
+                            @if (printer.isDefault) { (Por defecto) }
+                        </option>
+                        }
+                    </select>
+                </div>
+
+                <button (click)="loadPrinters()" [disabled]="loadingPrinters()"
+                    class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors"
+                    title="Refrescar lista">
+                    <svg class="w-5 h-5" [class.animate-spin]="loadingPrinters()" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+
+            <button (click)="testPrinter()" [disabled]="testingPrinter()"
+                class="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                @if (testingPrinter()) {
+                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                Probando...
+                } @else {
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Probar Impresora
+                }
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección: Impresora Térmica Nativa (WebSerial) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mt-6">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-800">Impresora Térmica (ESC/POS)</h2>
+                        <p class="text-xs text-slate-500">Conexión directa USB/COM (Requiere Chrome/Edge)</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [(ngModel)]="formData.useWebSerialPrinter" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+            </div>
+        </div>
+        
+        @if (formData.useWebSerialPrinter) {
+        <div class="p-6 space-y-4">
+           <div class="flex items-center justify-between p-4 bg-slate-50 text-slate-800 rounded-xl border border-slate-200">
+              <div>
+                 <p class="font-bold">Estado de Conexión</p>
+                 <p class="text-xs mt-1 font-semibold" [class.text-emerald-600]="thermalPrinterConnected()">{{ thermalPrinterConnected() ? 'Conectada y lista para imprimir' : 'Desconectada (Si recargas la página debes volver a conectar)' }}</p>
+              </div>
+              <button (click)="connectThermalPrinter()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow-sm transition-colors">
+                 {{ thermalPrinterConnected() ? 'Reconectar Impresora' : 'Conectar Impresora / USB' }}
+              </button>
+           </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- TAB: ARCA -->
+    @if (activeTab() === 'arca') {
+    <!-- Sección: Facturación Electrónica (ARCA) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-slate-800">Facturación Electrónica (ARCA)</h2>
+                    <p class="text-xs text-slate-500">Conexión directa con AFIP para comprobantes oficiales</p>
+                </div>
+            </div>
+
+            <button (click)="saveInvoicingConfig()" [disabled]="savingInvoicing()"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-colors">
+                @if (savingInvoicing()) { Guardando... } @else { Guardar Facturación }
+            </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Toggle Principal -->
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div>
+                    <p class="font-bold text-slate-800">Estado del Módulo</p>
+                    <p class="text-xs text-slate-500">Activa o desactiva la facturación oficial</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [(ngModel)]="invoicingConfig().isEnabled" class="sr-only peer">
+                    <div
+                        class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                    </div>
+                </label>
+            </div>
+
+            @if (invoicingConfig().isEnabled) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Config Básica -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">CUIT de la Empresa</label>
+                        <input type="text" [(ngModel)]="invoicingConfig().cuit" placeholder="XX-XXXXXXXX-X"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Condición Fiscal</label>
+                        <select [ngModel]="invoicingConfig().fiscalCondition"
+                            (ngModelChange)="onFiscalConditionChange($event)"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="MONOTRIBUTO">Responsable Monotributo</option>
+                            <option value="RESP_INSCRIPTO">Responsable Inscripto</option>
+                            <option value="EXENTO">Exento / No Responsable</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Punto de Venta</label>
+                        <input type="number" [(ngModel)]="invoicingConfig().salePoint" placeholder="Ej: 5"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Credenciales -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Entorno ARCA</label>
+                        <select [(ngModel)]="invoicingConfig().environment"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="testing">Homologación (Pruebas)</option>
+                            <option value="production">Producción (Real)</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Certificado ARCA (.crt o .pem)</label>
+                        <textarea [(ngModel)]="invoicingConfig().certContent" rows="4" placeholder="-----BEGIN CERTIFICATE-----..."
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono text-xs"></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Llave Privada (.key)</label>
+                        <textarea [(ngModel)]="invoicingConfig().keyContent" rows="4" placeholder="-----BEGIN RSA PRIVATE KEY-----..."
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono text-xs"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos de Empresa y Logo -->
+            <div class="space-y-4 pt-4 border-t border-slate-100">
+                <h3 class="font-bold text-slate-800 text-sm">Identidad Visual y Comprobantes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Razón Social</label>
+                        <input type="text" [(ngModel)]="invoicingConfig().businessName"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Domicilio Comercial</label>
+                        <input type="text" [(ngModel)]="invoicingConfig().businessAddress"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Ruta del Logo (Imagen
+                            PNG/JPG)</label>
+                        <input type="text" [(ngModel)]="invoicingConfig().businessLogo" placeholder="C:\logos\logo.png"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMTP y Avanzado -->
+            <div class="pt-4 border-t border-slate-100">
+                <button (click)="showAdvancedPaths = !showAdvancedPaths"
+                    class="text-xs text-blue-600 font-bold hover:underline">
+                    {{ showAdvancedPaths ? 'Ocultar Opciones Avanzadas' : 'Ver Opciones de Envío y PDF' }}
+                </button>
+
+                @if (showAdvancedPaths) {
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl">
+                    <div class="space-y-4">
+                        <p class="font-bold text-xs text-slate-600 uppercase">Servidor de Email (SMTP)</p>
+                        <input type="text" [(ngModel)]="invoicingConfig().smtpHost" placeholder="Host (smtp.gmail.com)"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                        <input type="number" [(ngModel)]="invoicingConfig().smtpPort" placeholder="Puerto (587)"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                        <input type="text" [(ngModel)]="invoicingConfig().smtpUser" placeholder="Usuario"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                        <input type="password" [(ngModel)]="invoicingConfig().smtpPass" placeholder="Contraseña"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                    </div>
+                    <div class="space-y-4">
+                        <p class="font-bold text-xs text-slate-600 uppercase">PDF y Automatización</p>
+                        <input type="text" [(ngModel)]="invoicingConfig().pdfSavePath"
+                            placeholder="Carpeta para guardar PDFs"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" [(ngModel)]="invoicingConfig().autoInvoice">
+                            <span class="text-sm">Facturación automática (ventas >= Monto Min.)</span>
+                        </label>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">Monto Mínimo (Centavos)</label>
+                            <input type="number" [(ngModel)]="invoicingConfig().minAmountCents"
+                                class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Estado y Test -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div
+                        [class]="arcaStatus()?.available ? 'w-3 h-3 bg-emerald-500 rounded-full' : 'w-3 h-3 bg-slate-300 rounded-full'">
+                    </div>
+                    <span class="text-sm font-medium">Estado: </span>
+                    <span class="text-sm" [class.text-emerald-600]="arcaStatus()?.available">
+                        {{ arcaStatus()?.available ? 'Conectado' : (arcaStatus()?.error ? 'Error' : 'Pendiente de
+                        prueba') }}
+                    </span>
+                </div>
+
+                <div class="flex gap-2">
+                    <button (click)="testArcaConnection()" [disabled]="testingArca()"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-bold transition-colors">
+                        @if (testingArca()) { Probando... } @else { Probar Conexión }
+                    </button>
+                </div>
+            </div>
+
+            @if (invoicingConfig().lastError) {
+            <div class="p-4 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">
+                <p class="font-bold">Último error registrado:</p>
+                <p class="mt-1">{{ invoicingConfig().lastError }}</p>
+            </div>
+            }
+            }
+        </div>
+    </div>
+    }
+
+</div>

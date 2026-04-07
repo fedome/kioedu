@@ -1,0 +1,72 @@
+.modal-root {
+  padding: 16px;
+}
+
+.topup-modal-content {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-title {
+  text-align: center;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.modal-subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 12px;
+}
+
+.current-limit {
+  text-align: center;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  color: #4b5563;
+
+  .no-limit-text {
+    color: #9ca3af;
+  }
+}
+
+.limit-modal-content {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.helper-text {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.confirm-button {
+  margin-top: 4px;
+  --border-radius: 999px;
+  font-weight: 600;
+}
+
+.cancel-link {
+  margin-top: 8px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+ion-input {
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}

@@ -1,0 +1,95 @@
+<div class="modal-root">
+  <ion-card class="modal-card">
+    <ion-card-content>
+
+      <h2 class="modal-title">Contactar soporte</h2>
+      <p class="modal-subtitle">
+        Contanos quién sos, cómo podemos contactarte y qué problema o sugerencia tenés.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="support-form">
+
+        <!-- Nombre -->
+        <ion-input
+          label="Nombre y apellido"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="name"
+          class="ion-margin-bottom input-rounded">
+        </ion-input>
+        <ion-text color="danger" *ngIf="hasError('name','required')">
+          <p class="error-text">Este campo es obligatorio.</p>
+        </ion-text>
+
+        <!-- Contacto -->
+        <ion-input
+          label="Forma de contacto (email o teléfono)"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="contact"
+          class="ion-margin-bottom input-rounded">
+        </ion-input>
+        <ion-text color="danger" *ngIf="hasError('contact','required')">
+          <p class="error-text">Indicá cómo podemos responderte.</p>
+        </ion-text>
+
+        <!-- Tema -->
+        <ion-item lines="none" class="filter-item">
+          <ion-select
+            label="Tema"
+            labelPlacement="stacked"
+            interface="popover"
+            formControlName="topic">
+            <ion-select-option value="general">
+              Consulta general
+            </ion-select-option>
+            <ion-select-option value="access">
+              Problemas de acceso / login
+            </ion-select-option>
+            <ion-select-option value="balance">
+              Saldo, recargas o movimientos
+            </ion-select-option>
+            <ion-select-option value="cards">
+              Tarjetas y activación
+            </ion-select-option>
+            <ion-select-option value="suggestion">
+              Sugerencia o mejora
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Detalle -->
+        <ion-textarea
+          label="Detalle del problema o sugerencia"
+          labelPlacement="stacked"
+          autoGrow="true"
+          fill="outline"
+          formControlName="message"
+          class="ion-margin-bottom input-rounded"
+          rows="4">
+        </ion-textarea>
+        <ion-text color="danger" *ngIf="hasError('message','required')">
+          <p class="error-text">Contanos un poco qué pasó.</p>
+        </ion-text>
+
+        <!-- Acciones -->
+        <div class="actions">
+          <ion-button
+            type="button"
+            fill="clear"
+            (click)="cancel()">
+            Cancelar
+          </ion-button>
+
+          <ion-button
+            type="submit"
+            [disabled]="form.invalid">
+            Enviar por mail
+          </ion-button>
+        </div>
+
+      </form>
+
+    </ion-card-content>
+  </ion-card>
+</div>

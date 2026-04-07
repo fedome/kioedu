@@ -1,0 +1,128 @@
+.modal-root {
+  width: 100%;
+}
+.close-btn {
+  --color: var(--mk-text-subtle);
+}
+
+.detail-content {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.receipt-container {
+  background: var(--mk-modal-solid-bg);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 24px;
+
+    .icon-circle {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      background: rgba(var(--ion-color-secondary-rgb), 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 1.8rem;
+        color: var(--ion-color-secondary);
+      }
+    }
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--mk-text-main);
+    }
+    .date {
+      margin: 0 0 16px;
+      font-size: 0.8rem;
+      color: var(--mk-text-subtle);
+      font-weight: 500;
+    }
+    .total-amount {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--mk-text-main);
+      letter-spacing: -1px;
+    }
+  }
+
+  .divider {
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 5px,
+      rgba(0,0,0,0.1) 5px,
+      rgba(0,0,0,0.1) 10px
+    );
+    margin-bottom: 24px;
+  }
+
+  .receipt-body {
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--mk-text-subtle);
+      margin: 0 0 16px;
+    }
+    
+    .receipt-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .item-main {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .qty {
+          font-weight: 800;
+          color: var(--ion-color-secondary);
+          font-size: 0.9rem;
+        }
+        .name {
+          font-weight: 600;
+          color: var(--mk-text-main);
+          font-size: 0.9rem;
+        }
+      }
+      .price {
+        font-weight: 700;
+        color: var(--mk-text-main);
+        font-size: 0.95rem;
+      }
+    }
+
+    .empty-items {
+      font-size: 0.85rem;
+      color: var(--mk-text-subtle);
+      text-align: center;
+      font-style: italic;
+    }
+  }
+}
+
+:host-context(body.dark) {
+  .receipt-container {
+    background: var(--mk-modal-solid-bg);
+    border-color: var(--mk-card-border);
+  }
+}

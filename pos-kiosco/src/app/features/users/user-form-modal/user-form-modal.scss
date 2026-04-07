@@ -1,0 +1,39 @@
+// El modal usa clases de TailwindCSS por compatibilidad con el resto del proyecto,
+// pero podemos agregar estilos específicos aquí si es necesario.
+// Como el usuario pidió "vibrant colors" y "premium feel", me aseguro de que
+// las clases de Tailwind en el HTML sean suficientes o agrego overrides.
+
+:host {
+    display: block;
+}
+
+/* Animación de entrada suave */
+.fixed {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.relative.bg-white {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

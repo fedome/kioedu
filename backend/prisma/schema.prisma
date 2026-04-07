@@ -1,0 +1,595 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  schoolId    Int?
+  isPosRole   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  school      School?          @relation(fields: [schoolId], references: [id])
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@index([schoolId])
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  action      String
+  subject     String
+  description String?
+  createdAt   DateTime         @default(now())
+  roles       RolePermission[]
+
+  @@unique([action, subject])
+}
+
+model UserRole {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model User {
+  id                    Int               @id @default(autoincrement())
+  name                  String
+  email                 String            @unique @db.Citext
+  password              String
+  createdAt             DateTime          @default(now())
+  documentType          DocumentType?
+  documentNumber        String?
+  isActive              Boolean           @default(true)
+  schoolId              Int?
+  openedCashSessions    CashSession[]     @relation("CashSessionOpenedBy")
+  closedCashSessions    CashSession[]     @relation("CashSessionClosedBy")
+  children              Child[]           @relation("ParentChildren")
+  deviceTokens          DevicePushToken[]
+  kioskSessions         KioskSession[]    @relation("KioskSessionsByCashier")
+  notifications         Notification[]
+  priceChanges          PriceHistory[]    @relation("PriceChanges")
+  createdBatches        ProductBatch[]
+  processedTransactions Transaction[]
+  school                School?           @relation(fields: [schoolId], references: [id])
+  roles                 UserRole[]
+
+  @@unique([documentType, documentNumber])
+  @@index([schoolId])
+}
+
+model School {
+  id              Int              @id @default(autoincrement())
+  name            String
+  address         String?
+  inviteCode      String?          @unique
+  createdAt       DateTime         @default(now())
+  children        Child[]
+  invoicingConfig InvoicingConfig?
+  kiosks          Kiosk[]
+  roles           Role[]
+  users           User[]
+  owners          Owner[]
+}
+
+model Owner {
+  id            Int           @id @default(autoincrement())
+  schoolId      Int
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  mpAccessToken String?
+  mpPublicKey   String?
+  school        School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  kiosks        Kiosk[]
+  products      Product[]
+  categories    Category[]
+  suppliers     Supplier[]
+  accounts      Account[]
+  transactions  Transaction[]
+
+  @@index([schoolId])
+}
+
+model InvoicingConfig {
+  id              Int      @id @default(autoincrement())
+  schoolId        Int      @unique
+  isEnabled       Boolean  @default(false)
+  cuit            String?
+  fiscalCondition String   @default("MONOTRIBUTO")
+  invoiceType     Int      @default(11)
+  salePoint       Int?
+  certContent     String?  @db.Text
+  keyContent      String?  @db.Text
+  autoInvoice     Boolean  @default(false)
+  minAmountCents  Int      @default(0)
+  environment     String   @default("testing")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  accessToken     String?
+  businessAddress String?
+  businessName    String?
+  emailSubject    String?
+  pdfSavePath     String?
+  smtpHost        String?
+  smtpPass        String?
+  smtpPort        Int?
+  smtpUser        String?
+  businessLogo    String?
+  lastError       String?
+  school          School   @relation(fields: [schoolId], references: [id])
+}
+
+model Child {
+  id             Int           @id @default(autoincrement())
+  schoolId       Int
+  firstName      String
+  lastName       String
+  documentType   DocumentType?
+  documentNumber String?
+  createdAt      DateTime      @default(now())
+  parentId       Int?
+  dateOfBirth    DateTime?
+  division       String?
+  grade          String?
+  isActive       Boolean       @default(true)
+  updatedAt      DateTime      @default(now()) @updatedAt
+  accounts       Account[]
+  card           Card?
+  parent         User?         @relation("ParentChildren", fields: [parentId], references: [id])
+  school         School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  dailyLimit     DailyLimit?   @relation("ChildDailyLimit")
+
+  @@unique([schoolId, documentType, documentNumber])
+  @@index([schoolId])
+}
+
+model Card {
+  id        Int         @id @default(autoincrement())
+  uidHex    String      @unique
+  childId   Int         @unique
+  isBlocked Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  child     Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
+  events    CardEvent[]
+}
+
+model CardEvent {
+  id        Int      @id @default(autoincrement())
+  cardId    Int
+  event     String // "ACTIVATED", "BLOCKED", "UNBLOCKED", "LOST", "REPLACED"
+  reason    String?
+  userId    Int? // who performed the action
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, createdAt])
+}
+
+model CategoryRestriction {
+  id         Int      @id @default(autoincrement())
+  childId    Int
+  categoryId Int
+  createdAt  DateTime @default(now())
+  createdBy  Int? // parent userId
+
+  @@unique([childId, categoryId])
+  @@index([childId])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  at         DateTime @default(now())
+  requestId  String
+  method     String
+  path       String
+  status     Int
+  durationMs Int
+  ip         String?
+  userAgent  String?
+  kioskId    Int?
+  userId     Int?
+}
+
+model Account {
+  id               Int           @id @default(autoincrement())
+  childId          Int
+  ownerId          Int
+  balanceCents     Int           @default(0)
+  createdAt        DateTime      @default(now())
+  creditLimitCents Int           @default(0)
+  child            Child         @relation(fields: [childId], references: [id], onDelete: Cascade)
+  owner            Owner         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+
+  @@unique([childId, ownerId])
+  @@index([childId])
+  @@index([ownerId])
+}
+
+model DailyLimit {
+  childId    Int      @id
+  limitCents Int
+  updatedAt  DateTime @updatedAt
+  child      Child    @relation("ChildDailyLimit", fields: [childId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+  id            Int               @id @default(autoincrement())
+  type          TransactionType
+  status        TransactionStatus
+  paymentMethod PaymentMethod
+  subTotalCents Int
+  taxCents      Int
+  totalCents    Int
+  ownerId       Int
+  cashierId     Int
+  terminalId    Int
+  owner         Owner             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  externalRef      String?           @unique
+  startedAt        DateTime          @default(now())
+  completedAt      DateTime?
+  accountId        Int?
+  isOffline        Boolean           @default(false)
+  mpPaymentId      String?
+  mpPreferenceId   String?
+  voidReason       String?
+  invoiceCae       String?
+  invoiceCaeExpiry DateTime?
+  invoiceDate      DateTime?
+  invoiceNumber    Int?
+  invoiceType      Int?
+  clientDocNumber  String?
+  clientDocType    String?
+  invoiceError     String?
+  updatedAt        DateTime          @default(now()) @updatedAt
+  account          Account?          @relation(fields: [accountId], references: [id])
+  cashier          User              @relation(fields: [cashierId], references: [id])
+  items            TransactionItem[]
+
+  @@index([accountId])
+  @@index([cashierId])
+  @@index([terminalId])
+  @@index([startedAt])
+  @@index([status])
+}
+
+model TransactionItem {
+  id                 Int         @id @default(autoincrement())
+  transactionId      Int
+  productId          Int?
+  description        String
+  quantity           Int
+  unitPriceCents     Int
+  overridePriceCents Int?
+  taxRate            Decimal     @default(0)
+  totalLineCents     Int
+  product            Product?    @relation(fields: [productId], references: [id])
+  transaction        Transaction @relation(fields: [transactionId], references: [id])
+
+  @@index([transactionId])
+  @@index([productId])
+}
+
+model Product {
+  id      Int    @id @default(autoincrement())
+  ownerId Int
+  name    String
+
+  barcode       String
+  sku           String?
+  priceCents    Int
+  costCents     Int?
+  taxRate       Decimal        @default(0)
+  trackStock    Boolean        @default(true)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  minStockLevel Int            @default(5)
+  stockQuantity Int            @default(0)
+  totalStock    Int            @default(0)
+  category      String?
+  categoryId    Int?
+  imageUrl      String?
+  supplierId    Int?
+  owner         Owner          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  priceHistory  PriceHistory[]
+
+  categoryRel        Category?           @relation(fields: [categoryId], references: [id])
+  supplier           Supplier?           @relation(fields: [supplierId], references: [id])
+  batches            ProductBatch[]
+  purchaseOrderItems PurchaseOrderItem[]
+  stockMovements     StockMovement[]
+  transactionItems   TransactionItem[]
+
+  @@unique([barcode, ownerId])
+  @@unique([sku, ownerId])
+  @@index([ownerId])
+}
+
+model Category {
+  id      Int    @id @default(autoincrement())
+  ownerId Int
+  name    String
+
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  owner       Owner     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products    Product[]
+
+  @@unique([name, ownerId])
+  @@index([ownerId])
+}
+
+model ProductBatch {
+  id             Int       @id @default(autoincrement())
+  productId      Int
+  expirationDate DateTime?
+  quantity       Int
+  createdAt      DateTime  @default(now())
+  unitCostCents  Int?
+  createdBy      Int?
+  invoiceNumber  String?
+  notes          String?
+  provider       String?
+  updatedAt      DateTime  @default(now()) @updatedAt
+  creator        User?     @relation(fields: [createdBy], references: [id])
+  product        Product   @relation(fields: [productId], references: [id])
+
+  @@index([productId, expirationDate])
+}
+
+model StockMovement {
+  id                    Int      @id @default(autoincrement())
+  productId             Int
+  type                  String
+  qtyDelta              Int
+  reason                String?
+  relatedId             String?
+  unitCostCentsSnapshot Int?
+  userId                Int?
+  createdAt             DateTime @default(now())
+  product               Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId, createdAt])
+  @@index([type])
+}
+
+model CashSession {
+  id                   Int            @id @default(autoincrement())
+  terminalId           Int
+  cashierId            Int
+  openedAt             DateTime       @default(now())
+  openingBalanceCents  Int
+  closedAt             DateTime?
+  closedByUserId       Int?
+  closingBalanceCents  Int?
+  expectedBalanceCents Int?
+  diffCents            Int?
+  cashMovements        CashMovement[] @relation("SessionToCashMovements")
+  cashier              User           @relation("CashSessionOpenedBy", fields: [cashierId], references: [id])
+  closedByUser         User?          @relation("CashSessionClosedBy", fields: [closedByUserId], references: [id])
+}
+
+model CashMovement {
+  id            Int         @id @default(autoincrement())
+  cashSessionId Int
+  kind          String
+  amount        Int
+  note          String?
+  createdAt     DateTime    @default(now())
+  cashSession   CashSession @relation("SessionToCashMovements", fields: [cashSessionId], references: [id], onDelete: Cascade)
+
+  @@index([cashSessionId, createdAt])
+}
+
+model Supplier {
+  id      Int    @id @default(autoincrement())
+  ownerId Int
+  name    String
+
+  contactInfo String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  address     String?
+  cuit        String?
+  email       String?
+  phone       String?
+  visitDays   String?
+  owner       Owner     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products    Product[]
+
+  purchaseOrders PurchaseOrder[]
+
+  @@index([ownerId])
+}
+
+model PurchaseOrder {
+  id             Int                 @id @default(autoincrement())
+  supplierId     Int
+  status         String
+  totalCostCents Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  receivedAt     DateTime?
+  supplier       Supplier            @relation(fields: [supplierId], references: [id])
+  items          PurchaseOrderItem[]
+
+  @@index([supplierId, status])
+}
+
+model PurchaseOrderItem {
+  id              Int           @id @default(autoincrement())
+  purchaseOrderId Int
+  productId       Int
+  quantity        Int
+  unitCostCents   Int
+  product         Product       @relation(fields: [productId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+}
+
+model Kiosk {
+  id                 Int            @id @default(autoincrement())
+  schoolId           Int
+  ownerId            Int
+  name               String
+  apiKey             String         @unique
+  subscriptionActive Boolean        @default(true)
+  subscriptionEndsAt DateTime?
+  createdAt          DateTime       @default(now())
+  school             School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  owner              Owner          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  sessions           KioskSession[] @relation("KioskToSessions")
+
+  shifts Shift[]
+
+  @@index([schoolId])
+  @@index([ownerId])
+}
+
+model KioskSession {
+  id            Int       @id @default(autoincrement())
+  kioskId       Int
+  jti           String    @unique
+  issuedAt      DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  reason        String?
+  cashierUserId Int?
+  cashier       User?     @relation("KioskSessionsByCashier", fields: [cashierUserId], references: [id])
+  kiosk         Kiosk     @relation("KioskToSessions", fields: [kioskId], references: [id], onDelete: Cascade)
+
+  @@index([kioskId, expiresAt])
+  @@index([kioskId, revokedAt])
+  @@index([cashierUserId])
+}
+
+model Shift {
+  id             Int      @id @default(autoincrement())
+  kioskId        Int
+  openedByUserId Int
+  openedAt       DateTime @default(now())
+  isClosed       Boolean  @default(false)
+  closedByUserId Int?
+  kiosk          Kiosk    @relation(fields: [kioskId], references: [id])
+
+  @@index([kioskId])
+}
+
+model DevicePushToken {
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  token      String       @unique
+  createdAt  DateTime     @default(now())
+  lastSeenAt DateTime     @updatedAt
+  disabled   Boolean      @default(false)
+  platform   PushPlatform
+  user       User         @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  kind      NotificationKind
+  title     String
+  message   String
+  data      Json?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  deleted   Boolean          @default(false)
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model PriceHistory {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  oldPriceCents Int?
+  newPriceCents Int?
+  oldCostCents  Int?
+  newCostCents  Int?
+  createdAt     DateTime @default(now())
+  userId        Int?
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  changedBy     User?    @relation("PriceChanges", fields: [userId], references: [id])
+
+  @@index([productId, createdAt])
+}
+
+enum DocumentType {
+  DNI
+  CUIT
+  CUIL
+  PASSPORT
+}
+
+enum TransactionType {
+  SALE
+  REFUND
+  VOID
+  TOPUP
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  WALLET
+  MERCADOPAGO
+  TRANSFER
+  ACCOUNT
+}
+
+enum PushPlatform {
+  ANDROID
+  IOS
+  WEB
+}
+
+enum NotificationKind {
+  MOVEMENT
+  LOW_BALANCE
+  LIMIT_REACHED
+  NEWS
+}
+
+model GlobalProductImage {
+  id        Int      @id @default(autoincrement())
+  term      String   @unique
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

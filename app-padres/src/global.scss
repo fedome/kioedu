@@ -1,0 +1,257 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ */
+
+/* Core CSS required for Ionic components to work properly */
+body {
+  font-family: var(--ion-font-family), sans-serif;
+}
+
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Fondo por defecto de todas las páginas */
+ion-content {
+  --background: var(--mk-page-bg);
+}
+
+/* ==========================
+   RESPONSIVE: Max-width
+   ========================== */
+.dashboard-wrapper,
+.activity-wrapper,
+.profile-wrapper,
+.settings-wrapper,
+.login-wrapper,
+.onboarding-wrapper {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Smaller screens */
+@media (max-width: 340px) {
+  .balance-card {
+    padding: 20px 16px !important;
+
+    .balance-amount {
+      font-size: 2rem !important;
+    }
+  }
+
+  .children-slider .child-slide-card {
+    min-width: 120px !important;
+    padding: 16px 12px !important;
+  }
+}
+
+/* ==========================
+   MODAL STYLES
+   ========================== */
+ion-modal.auto-height-modal {
+  --height: auto;
+  --backdrop-opacity: 0.45;
+  --background: transparent;
+  --border-radius: 24px;
+  --max-width: calc(100% - 32px);
+  --width: calc(100% - 32px);
+
+  &::part(content) {
+    border-radius: 24px;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+    pointer-events: auto;
+    padding-bottom: env(safe-area-inset-bottom);
+    margin: auto;
+  }
+}
+
+/* ==========================
+   UTILITY CLASSES
+   ========================== */
+.mk-modal-card {
+  background: var(--mk-card-bg);
+  border-radius: 20px;
+  box-shadow: var(--mk-card-shadow);
+}
+
+/* Glassmorphism Cards */
+.rounded-card {
+  --background: var(--mk-card-bg);
+  background: var(--mk-card-bg);
+  backdrop-filter: var(--mk-glass-blur);
+  -webkit-backdrop-filter: var(--mk-glass-blur);
+  border-radius: 28px;
+  border: 1px solid var(--mk-card-border);
+  box-shadow: var(--mk-card-shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 0.6s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* KioEdu Modern Buttons */
+.pill-button {
+  --border-radius: 16px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-top: 24px;
+  height: 54px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* KioEdu Inputs */
+.mk-input,
+.input-item {
+  --background: var(--mk-input-bg);
+  --color: var(--mk-input-text);
+  --placeholder-color: var(--mk-text-subtle);
+  --border-radius: 16px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+
+  background: var(--mk-input-bg);
+  border: 1px solid var(--mk-input-border);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.item-has-focus {
+    border-color: var(--ion-color-secondary);
+    box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
+  }
+
+  ion-icon {
+    color: var(--ion-color-secondary);
+    font-size: 20px;
+    margin-right: 12px;
+  }
+
+  ion-input {
+    font-weight: 500;
+    --placeholder-font-weight: 400;
+  }
+}
+
+.success-badge {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.warning-badge {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ==========================
+   TOASTS PILL STYLE
+   ========================== */
+ion-toast.mk-toast {
+  --background: transparent;
+  --box-shadow: none;
+  --color: inherit;
+  --max-width: 90%;
+}
+
+ion-toast.mk-toast::part(container) {
+  border-radius: 999px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+}
+
+ion-toast.mk-toast::part(header) {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+ion-toast.mk-toast::part(message) {
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+ion-toast.mk-toast::part(button) {
+  margin-left: auto;
+}
+
+ion-toast.mk-toast::part(icon) {
+  font-size: 1.1rem;
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+
+/* Toast Variants */
+ion-toast.mk-toast-success::part(container) {
+  background: #ecfdf3;
+  color: #166534;
+}
+ion-toast.mk-toast-success::part(icon) { color: #16a34a; }
+
+ion-toast.mk-toast-error::part(container) {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+ion-toast.mk-toast-error::part(icon) { color: #ef4444; }
+
+ion-toast.mk-toast-warning::part(container) {
+  background: #fef3c7;
+  color: #92400e;
+}
+ion-toast.mk-toast-warning::part(icon) { color: #f59e0b; }
+
+ion-toast.mk-toast-info::part(container) {
+  background: #e0edff;
+  color: #1d4ed8;
+}
+ion-toast.mk-toast-info::part(icon) { color: #3b82f6; }

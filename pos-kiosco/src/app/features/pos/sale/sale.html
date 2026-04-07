@@ -1,0 +1,314 @@
+<div class="h-[calc(100vh-6rem)] grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 overflow-hidden">
+
+  <div class="lg:col-span-8 flex flex-col gap-4 h-full">
+
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        <input #searchInput type="text" [(ngModel)]="searchTerm"
+          (keydown.enter)="filteredProducts.length === 1 ? addToCart(filteredProducts[0]) : null"
+          placeholder="Buscar producto (Escáner o nombre)..."
+          class="block w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent text-slate-900 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl text-lg transition-all outline-none font-medium">
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto pr-2">
+      <!-- Sección FAVORITOS -->
+      @if (quickProducts.length > 0) {
+      <div class="flex items-center justify-between mb-3 bg-indigo-50/50 p-2 rounded-lg border border-indigo-100">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-2">
+            <span class="text-lg">⭐</span> Favoritos (Accesso Rápido)
+          </h3>
+          <span class="text-[10px] text-indigo-500 font-medium px-2 bg-white rounded-md border border-indigo-200">
+            F1 - F{{ quickProducts.length }}
+          </span>
+        </div>
+        <div class="flex gap-2 text-[10px] text-slate-400">
+          <span class="bg-white px-2 py-0.5 rounded border border-slate-200">+/- Cantidad</span>
+          <span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold shadow-sm">F12 Cobrar</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 mb-6">
+        @for (product of quickProducts; track product.id; let i = $index) {
+        <button (click)="addToCart(product)"
+          class="group bg-white rounded-xl shadow-sm hover:shadow-md border-2 border-transparent hover:border-indigo-500 transition-all text-left flex flex-col h-full overflow-hidden active:scale-95 py-2 relative">
+
+          <!-- Botón Favorito Absolute -->
+          <div (click)="toggleFavorite(product, $event)"
+            class="absolute top-2 left-2 z-20 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-sm cursor-pointer transition-transform hover:scale-110 text-yellow-400 border border-slate-100">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+
+          <!-- Imagen o Placeholder -->
+          <div
+            class="h-20 w-full relative overflow-hidden flex items-center justify-center bg-slate-50 mb-2 rounded-lg mx-auto w-[90%]">
+            @if (product.imageUrl) {
+            <img [src]="product.imageUrl"
+              class="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-300"
+              onerror="this.style.display='none'">
+            } @else {
+            <div class="text-slate-300 flex flex-col items-center justify-center h-full w-full">
+              <span
+                class="text-xl font-bold bg-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm text-indigo-400">
+                {{ product.name.charAt(0).toUpperCase() }}
+              </span>
+            </div>
+            }
+          </div>
+
+          <div class="px-3 pb-1 flex flex-col flex-1 w-full relative">
+            <div
+              class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm z-10">
+              F{{ i + 1 }}
+            </div>
+
+            <div class="flex-1">
+              <h3
+                class="font-bold text-slate-800 text-sm leading-tight line-clamp-2 group-hover:text-indigo-700 transition-colors min-h-[2.5em]">
+                {{ product.name }}
+              </h3>
+            </div>
+
+            <div class="mt-1 pt-1 border-t border-slate-50 flex justify-between items-end">
+              <div class="text-[10px] text-slate-400">Stock: <span [class]="getProductStockClass(product)">{{
+                  product.stockQuantity }}</span></div>
+              <div
+                class="text-sm font-black text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors">
+                $ {{ product.priceCents / 100 | number:'1.0-0' }}</div>
+            </div>
+          </div>
+        </button>
+        }
+      </div>
+      }
+
+      <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        Todos los Productos
+      </h3>
+
+      <!-- Filtros de Categoría -->
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button (click)="selectCategory(null)"
+          class="px-3 py-1.5 rounded-full text-xs font-semibold transition-all border"
+          [class]="!selectedCategory ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600'">
+          Todos
+        </button>
+        @for (cat of categories; track cat) {
+        <button (click)="selectCategory(cat)"
+          class="px-3 py-1.5 rounded-full text-xs font-semibold transition-all border" [class]="selectedCategory === cat
+            ? getCategoryColor(cat).bg + ' ' + getCategoryColor(cat).text + ' ' + getCategoryColor(cat).border + ' shadow-md ring-1 ring-offset-1 ' + getCategoryColor(cat).border
+            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'">
+          {{ cat }}
+        </button>
+        }
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 pb-10">
+        @for (product of filteredProducts; track product.id) {
+        <button (click)="addToCart(product)"
+          class="group bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 rounded-xl p-3 flex items-center gap-3 transition-all shadow-sm hover:shadow-md text-left active:scale-95 relative min-h-[4.5rem]">
+
+          <!-- Botón Favorito (Toggle) -->
+          <div (click)="toggleFavorite(product, $event)"
+            class="absolute top-2 right-2 z-20 text-slate-300 hover:text-yellow-400 hover:scale-110 transition-all cursor-pointer"
+            [class.text-yellow-400]="isFavorite(product)">
+            <svg class="w-4 h-4" [attr.fill]="isFavorite(product) ? 'currentColor' : 'none'" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+          </div>
+
+          <!-- Thumbnail con color de categoría -->
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold transition-colors"
+            [ngClass]="[getCategoryColor(product.categoryRel?.name || 'Sin Categoría').bg, getCategoryColor(product.categoryRel?.name || 'Sin Categoría').text]">
+            @if (product.imageUrl) {
+            <img [src]="product.imageUrl" class="w-full h-full object-cover rounded-xl"
+              onerror="this.style.display='none'">
+            } @else {
+            <span>{{ product.name.charAt(0) }}</span>
+            }
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-slate-800 text-xs line-clamp-2 leading-tight">{{ product.name }}</h4>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-indigo-600 font-bold text-sm">$ {{ product.priceCents / 100 | number:'1.0-0':'es-AR'
+                }}</span>
+              @if (product.categoryRel?.name) {
+              <span class="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
+                [ngClass]="[getCategoryColor(product.categoryRel!.name).bg, getCategoryColor(product.categoryRel!.name).text]">
+                {{ product.categoryRel!.name }}
+              </span>
+              }
+            </div>
+          </div>
+        </button>
+        }
+      </div>
+
+      @if (filteredProducts.length === 0 && !isLoading) {
+      <div class="py-10 text-center text-slate-400">
+        <p>No se encontraron productos.</p>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="lg:col-span-4 flex flex-col h-full gap-4">
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 relative z-20">
+
+      <div *ngIf="!selectedStudent" class="p-4 bg-indigo-50/50 relative">
+        <label class="block text-xs font-bold text-indigo-800 uppercase mb-2">Cliente / Alumno</label>
+        <div class="flex gap-2">
+          <input #studentInput type="text" [(ngModel)]="studentSearchTerm" (keydown)="onStudentInputKeydown($event)"
+            placeholder="Escanear tarjeta o buscar..."
+            class="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none">
+          <button (click)="searchStudent()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-[10px] text-indigo-400 mt-2 ml-1">💡 Tips: Pasa la tarjeta RFID para detección automática.</p>
+
+        @if (searchResults.length > 0 && !selectedStudent) {
+          <div class="absolute top-[80%] left-4 right-4 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 max-h-48 overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2">
+            @for (student of searchResults; track student.id) {
+              <button (click)="selectStudent(student)" class="w-full text-left px-4 py-3 hover:bg-indigo-50 border-b border-slate-50 last:border-0 flex justify-between items-center group transition-colors">
+                <div>
+                  <span class="font-bold text-slate-700 block">{{ student.firstName }} {{ student.lastName }}</span>
+                  <span class="text-xs text-slate-400">DNI: {{ student.documentNumber || '---' }}</span>
+                </div>
+                <span class="text-xs text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md font-medium">
+                  Saldo: $ {{ (student.accounts?.[0]?.balanceCents || 0) / 100 }}
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div *ngIf="selectedStudent" class="bg-indigo-600 p-4 text-white relative overflow-hidden group">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path
+              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
+          </svg>
+        </div>
+
+        <div class="relative z-10 flex justify-between items-start">
+          <div>
+            <p class="text-indigo-200 text-xs font-bold uppercase tracking-wider">Alumno</p>
+            <h3 class="font-bold text-lg truncate pr-4">{{ selectedStudent.firstName }} {{ selectedStudent.lastName }}
+            </h3>
+            <p class="text-indigo-200 text-xs font-mono mt-0.5">{{ selectedStudent.documentNumber }}</p>
+          </div>
+          <button (click)="removeStudent()"
+            class="text-white/60 hover:text-white hover:bg-white/20 rounded p-1 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="relative z-10 mt-4 pt-4 border-t border-indigo-500/50 flex justify-between items-end">
+          <span class="text-indigo-200 text-sm">Saldo Disponible</span>
+          <span class="text-2xl font-black">$ {{ (selectedStudent.accounts?.[0]?.balanceCents || 0) / 100 | number:'1.2-2'
+            }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
+
+      <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+        <h2 class="font-bold text-slate-700 text-sm uppercase tracking-wider">Carrito</h2>
+        <button (click)="clearCart()" class="text-xs font-medium text-red-500 hover:text-red-700 hover:underline px-2"
+          [disabled]="!cart.length">Vaciar</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        @for (item of cart; track item.product.id) {
+        <div
+          class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-transparent hover:border-slate-200 transition-colors group">
+          <div class="flex flex-col items-center gap-1 bg-white rounded-lg border border-slate-200 shadow-sm p-1 w-8">
+            <button (click)="updateQuantity(item.product.id, 1)"
+              class="w-full text-slate-400 hover:text-indigo-600 text-[10px]">▲</button>
+            <span class="font-bold text-sm text-slate-800">{{ item.quantity }}</span>
+            <button (click)="updateQuantity(item.product.id, -1)"
+              class="w-full text-slate-400 hover:text-red-600 text-[10px]">▼</button>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-800 truncate">{{ item.product.name }}</p>
+            <p class="text-xs text-slate-400">$ {{ item.product.priceCents / 100 }} u.</p>
+          </div>
+          <div class="text-right">
+            <p class="text-indigo-600 font-bold">$ {{ (item.product.priceCents * item.quantity) / 100 }}</p>
+            <button (click)="removeFromCart(item.product.id)"
+              class="text-[10px] text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">Borrar</button>
+          </div>
+        </div>
+        }
+        @empty {
+        <div class="h-full flex flex-col items-center justify-center text-slate-300 opacity-60">
+          <svg class="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <p class="text-sm">Carrito vacío</p>
+        </div>
+        }
+      </div>
+
+      <div class="p-6 bg-slate-50 border-t border-slate-200">
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-lg font-bold text-slate-800">Total</span>
+          <span class="text-3xl font-extrabold text-indigo-600">$ {{ total | number:'1.2-2' }}</span>
+        </div>
+
+        <button (click)="checkout()" [disabled]="!cart.length || isLoading"
+          class="w-full py-4 text-white font-bold rounded-xl shadow-lg transition-all flex justify-center items-center gap-3 text-lg"
+          [class]="cart.length > 0 && !isLoading
+            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-indigo-200 active:scale-[0.98]'
+            : 'bg-slate-300 cursor-not-allowed shadow-none'">
+          <span>Cobrar</span>
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded">F12</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  @if (isSessionClosed) {
+  <app-open-session-modal (sessionOpened)="onSessionOpened()"></app-open-session-modal>
+  }
+  <app-payment-modal *ngIf="showPaymentModal" [total]="total"
+    [childName]="selectedStudent ? selectedStudent.firstName + ' ' + selectedStudent.lastName : undefined"
+    [qrCodeUrl]="qrCodeUrl" [isScanned]="isStudentScanned" (cancel)="showPaymentModal = false" (pay)="onPaymentConfirmed($event)">
+  </app-payment-modal>
+</div>

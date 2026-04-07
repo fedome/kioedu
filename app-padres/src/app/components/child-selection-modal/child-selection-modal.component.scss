@@ -1,0 +1,94 @@
+.modal-root {
+  width: 100%;
+}
+
+.modal-content {
+  background: var(--mk-modal-solid-bg);
+  padding: 32px 24px;
+  border-radius: 24px;
+  text-align: center;
+
+  h2 {
+    margin: 0 0 28px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--mk-text-main);
+    line-height: 1.4;
+  }
+
+  .children-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+
+    .child-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: rgba(var(--ion-color-primary-rgb), 0.04);
+      border: 1px solid var(--mk-card-border);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:active {
+        transform: scale(0.97);
+        background: rgba(var(--ion-color-primary-rgb), 0.08);
+      }
+
+      .child-avatar {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-tint) 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+      }
+
+      .child-name {
+        flex: 1;
+        text-align: left;
+        font-weight: 700;
+        color: var(--mk-text-main);
+        font-size: 1rem;
+      }
+
+      ion-icon {
+        color: var(--mk-text-subtle);
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .modal-footer {
+    padding-top: 8px;
+    
+    .btn-cancel {
+      --color: var(--ion-color-danger);
+      font-weight: 800;
+      text-transform: none;
+      font-size: 1rem;
+      margin: 0;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+    }
+  }
+}
+
+:host-context(body.dark) {
+  .child-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    
+    &:active {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
+}

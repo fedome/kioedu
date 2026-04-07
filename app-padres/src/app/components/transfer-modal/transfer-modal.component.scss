@@ -1,0 +1,74 @@
+.modal-root {
+  width: 100%;
+}
+.close-btn {
+  --color: var(--mk-text-subtle);
+}
+
+.modal-card {
+  background: var(--mk-page-bg);
+  border: 1px solid var(--mk-card-border, rgba(0, 0, 0, 0.05));
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+
+  .icon-header {
+    text-align: center;
+    margin-bottom: 24px;
+    
+    .icon-circle {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 12px;
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      ion-icon {
+        font-size: 1.5rem;
+        color: var(--ion-color-primary);
+      }
+    }
+    
+    p {
+      color: var(--mk-text-subtle);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+  }
+
+  .mk-input-premium {
+    --background: rgba(var(--mk-text-main-rgb), 0.04);
+    --border-radius: 16px;
+    --padding-start: 16px;
+    border: 1px solid rgba(var(--mk-text-main-rgb), 0.08);
+
+    ion-label {
+      font-weight: 700;
+      color: var(--mk-text-subtle);
+      margin-bottom: 4px;
+    }
+
+    ion-select, ion-input {
+      font-weight: 600;
+      color: var(--mk-text-main);
+    }
+  }
+
+  .confirm-btn {
+    --background: var(--ion-color-primary);
+    margin-top: 16px;
+    height: 48px;
+    font-weight: 700;
+    --border-radius: 12px;
+  }
+}
+
+:host-context(body.dark) {
+  .modal-card {
+    background: var(--mk-card-bg);
+    border: 1px solid var(--mk-card-border);
+  }
+}

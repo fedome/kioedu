@@ -1,0 +1,100 @@
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-100">
+
+    <div class="bg-emerald-50 border-b border-emerald-100 px-6 py-4 flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold text-emerald-900">Ingreso de Mercadería</h2>
+        <p class="text-emerald-700 text-xs font-medium">{{ product?.name }}</p>
+      </div>
+      <button (click)="cancel.emit()" class="text-emerald-600 hover:bg-emerald-100 rounded-full p-2 transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-5">
+
+      <!-- Tabs de Modo -->
+      <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl">
+        <button (click)="setMode('add')"
+          [class]="mode === 'add' ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-500 hover:bg-white/50'"
+          class="py-2 text-sm rounded-lg transition-all">Ingreso</button>
+        <button (click)="setMode('remove')"
+          [class]="mode === 'remove' ? 'bg-white text-red-600 shadow-sm font-bold' : 'text-slate-500 hover:bg-white/50'"
+          class="py-2 text-sm rounded-lg transition-all">Baja</button>
+        <button (click)="setMode('set')"
+          [class]="mode === 'set' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-500 hover:bg-white/50'"
+          class="py-2 text-sm rounded-lg transition-all">Ajuste Manual</button>
+      </div>
+
+      <!-- Cantidad Input -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+          @if (mode === 'add') { Cantidad a Ingresar }
+          @else if (mode === 'remove') { Cantidad a Retirar }
+          @else { Stock Final Real }
+        </label>
+        <div class="relative">
+          <input type="number" [(ngModel)]="formData.quantity" [class]="{
+              'border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500/10': mode === 'add',
+              'border-red-200 focus:border-red-500 focus:ring-red-500/10 text-red-700': mode === 'remove',
+              'border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500/10 text-indigo-700': mode === 'set'
+            }"
+            class="w-full px-4 py-3 text-2xl font-black text-center text-slate-800 bg-slate-50 border-2 rounded-xl outline-none transition-all"
+            placeholder="0" autofocus>
+          @if (mode === 'add') {
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 font-bold text-xl">+</div>
+          }
+          @if (mode === 'remove') {
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-red-400 font-bold text-xl">-</div>
+          }
+        </div>
+        @if (mode === 'set') {
+        <p class="text-xs text-center text-slate-400 mt-2">
+          Stock actual: <span class="font-bold">{{ product?.stockQuantity || 0 }}</span>.
+          Diferencia: <span class="font-bold"
+            [class]="(formData.quantity || 0) - (product?.stockQuantity || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'">
+            {{ ((formData.quantity || 0) - (product?.stockQuantity || 0)) | number:'1.0-0' }}
+          </span>
+        </p>
+        }
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Costo Unit. ($)</label>
+          <input type="number" [(ngModel)]="formData.costInput"
+            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none"
+            placeholder="Opcional">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Vencimiento</label>
+          <input type="date" [(ngModel)]="formData.expirationDate"
+            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Notas / Proveedor</label>
+        <textarea [(ngModel)]="formData.notes" rows="2"
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm resize-none focus:border-emerald-500 outline-none"
+          placeholder="Ej: Factura Arcor N° 123..."></textarea>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-50 p-4 border-t border-slate-100 flex justify-end gap-3">
+      <button (click)="cancel.emit()"
+        class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+      <button (click)="submit()" [disabled]="loading || !formData.quantity"
+        class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-200 disabled:opacity-50 disabled:shadow-none flex items-center gap-2">
+        <span *ngIf="loading"
+          class="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full"></span>
+        Confirmar Ingreso
+      </button>
+    </div>
+
+  </div>
+</div>

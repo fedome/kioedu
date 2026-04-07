@@ -1,0 +1,11 @@
+/* shell.scss */
+/* Scrollbar personalizada para que no quede fea en el sidebar */
+aside nav {
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
+}

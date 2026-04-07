@@ -1,0 +1,149 @@
+<div class="modal-root">
+  <ion-card class="modal-card">
+    <ion-card-content>
+
+      <h2 class="modal-title">
+        {{ mode === 'create' ? 'Agregar alumno' : 'Editar alumno' }}
+      </h2>
+      <p class="modal-subtitle">
+        Completá los datos del alumno para poder asociar su tarjeta y controlar el saldo.
+      </p>
+
+      <form [formGroup]="childForm" (ngSubmit)="save()">
+
+        <!-- Código del Colegio -->
+        <div *ngIf="mode === 'create'" class="ion-margin-bottom">
+          <ion-input
+            label="Código del colegio"
+            labelPlacement="stacked"
+            fill="outline"
+            formControlName="inviteCode"
+            placeholder="Ej. KIO2024ABC"
+            (ionBlur)="onInviteCodeBlur()">
+          </ion-input>
+          
+          <div *ngIf="isValidatingSchool" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--ion-color-medium); margin-top: 4px;">
+            <ion-spinner name="crescent" style="width: 14px; height: 14px;"></ion-spinner> Buscando colegio...
+          </div>
+          
+          <ion-text color="danger" *ngIf="schoolError" style="display: block; font-size: 0.85rem; margin-top: 4px;">
+            <ion-icon name="alert-circle-outline"></ion-icon> {{ schoolError }}
+          </ion-text>
+
+          <div *ngIf="schoolName" style="background: rgba(45, 211, 111, 0.1); color: var(--ion-color-success); padding: 8px 12px; border-radius: 8px; margin-top: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            Colegio: <strong>{{ schoolName }}</strong>
+          </div>
+        </div>
+
+        <!-- Nombre -->
+        <ion-input
+          label="Nombre"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="firstName"
+          class="ion-margin-bottom">
+        </ion-input>
+
+        <!-- Apellido -->
+        <ion-input
+          label="Apellido"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="lastName"
+          class="ion-margin-bottom">
+        </ion-input>
+
+        <!-- Tipo y número de documento -->
+        <div class="row-split ion-margin-bottom">
+          <ion-select
+            label="Tipo"
+            labelPlacement="stacked"
+            fill="outline"
+            formControlName="documentType"
+            interface="popover">
+            <ion-select-option
+              *ngFor="let dt of documentTypes"
+              [value]="dt.value">
+              {{ dt.label }}
+            </ion-select-option>
+          </ion-select>
+
+          <ion-input
+            label="Número"
+            labelPlacement="stacked"
+            fill="outline"
+            formControlName="documentNumber"
+            type="text"
+            [inputmode]="isDocNumeric ? 'numeric' : 'text'"
+            [maxlength]="documentMaxLen"
+            (ionInput)="onDocumentInput($event)"
+            (ionBlur)="onDocumentBlur()">
+          </ion-input>
+          <ion-text color="danger" *ngIf="docNumber.touched && docNumber.invalid">
+            <small>{{ documentNumberError }}</small>
+          </ion-text>
+        </div>
+
+        <!-- Fecha de nacimiento (input date nativo) -->
+        <ion-input
+          label="Fecha de nacimiento"
+          labelPlacement="stacked"
+          fill="outline"
+          formControlName="dateOfBirth"
+          type="date"
+          class="ion-margin-bottom date-input"
+          [max]="maxDob">
+        </ion-input>
+        <ion-text color="danger" *ngIf="childForm.get('dateOfBirth')?.touched && childForm.get('dateOfBirth')?.invalid">
+          <small>La fecha debe ser de hace al menos 1 año.</small>
+        </ion-text>
+
+        <!-- Curso / División -->
+        <div class="row-split ion-margin-bottom">
+          <ion-input
+            label="Curso"
+            labelPlacement="stacked"
+            fill="outline"
+            formControlName="grade"
+            type="text"
+            inputmode="numeric">
+          </ion-input>
+
+          <ion-input
+            label="División"
+            labelPlacement="stacked"
+            fill="outline"
+            formControlName="division"
+            maxlength="1"
+            inputmode="text"
+            autocapitalize="characters"
+            (ionInput)="onDivisionInput($event)">
+          </ion-input>
+        </div>
+
+        <!-- Botón principal -->
+        <ion-button
+          expand="block"
+          color="primary"
+          type="submit"
+          [disabled]="childForm.invalid"
+          class="confirm-button">
+          {{ mode === 'create' ? 'Confirmar' : 'Guardar cambios' }}
+        </ion-button>
+
+        <!-- Cancelar -->
+        <ion-button
+          expand="block"
+          fill="clear"
+          color="danger"
+          (click)="cancel()"
+          class="cancel-button">
+          CANCELAR
+        </ion-button>
+
+      </form>
+
+    </ion-card-content>
+  </ion-card>
+</div>

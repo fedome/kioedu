@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\app",
+    "\\src\\app\\core",
+    "\\src\\app\\core\\auth",
+    "\\src\\app\\layout",
+    "\\src\\app\\layout\\shell",
+    "\\src\\environments"
+  ],
+  "SelectedNode": "\\src\\app\\layout\\shell\\shell.html",
+  "PreviewInSolutionExplorer": false
+}

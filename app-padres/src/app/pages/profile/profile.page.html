@@ -1,0 +1,228 @@
+<ion-header class="dashboard-header ion-no-border">
+  <ion-toolbar class="dashboard-toolbar">
+
+
+    <!-- Título centrado -->
+    <ion-title class="header-title-center">
+      <div class="header-title">
+        <span class="header-kicker">Perfil</span>
+        <span class="header-main">Mi cuenta</span>
+      </div>
+    </ion-title>
+
+    <!-- Campanita a la derecha -->
+    <!--<ion-buttons slot="end">
+      <ion-button fill="clear" size="small" (click)="toggleNotifications()">
+        <ion-icon
+          [name]="notificationsEnabled ? 'notifications-outline' : 'notifications-off-outline'">
+        </ion-icon>
+      </ion-button>
+    </ion-buttons>-->
+
+
+    <app-notifications-bell slot="end"></app-notifications-bell>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-page">
+  <div class="profile-wrapper ion-padding">
+
+    <!-- Card usuario -->
+    <ion-card class="profile-card">
+      <ion-card-content>
+        <div class="profile-header">
+          <ion-avatar class="profile-avatar">
+            <div class="avatar-text">{{ initials }}</div>
+          </ion-avatar>
+
+          <div class="profile-text">
+            <h2>{{ profile?.name || 'Padre' }}</h2>
+            <p>{{ profile?.email }}</p>
+            <span class="role-pill" *ngIf="profile?.role">
+          {{ getRoleLabel(profile?.role) }}
+        </span>
+
+            <!-- 👇 Nuevo bloque -->
+            <div class="profile-extra" *ngIf="childrenCount > 0">
+              <span class="extra-label">Hijos asociados</span>
+              <span class="extra-value">
+            {{ childrenCount }} {{ childrenCount === 1 ? 'hijo' : 'hijos' }} vinculados
+          </span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Apariencia -->
+    <ion-card class="settings-card">
+      <ion-card-header>
+        <ion-card-title>Apariencia</ion-card-title>
+        <ion-card-subtitle>Ajustes visuales</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-icon slot="start" name="moon-outline"></ion-icon>
+          <ion-label>
+            <h3>Modo Oscuro</h3>
+            <p>Usar interfaz oscura</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="isDarkMode"
+            (ionChange)="toggleDarkMode($event)">
+          </ion-toggle>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Notificaciones -->
+    <ion-card class="settings-card">
+      <ion-card-header>
+        <ion-card-title>Notificaciones</ion-card-title>
+        <ion-card-subtitle>Preferencias de avisos</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>
+            <h3>Movimientos de cuenta</h3>
+            <p>Recibir avisos cuando haya compras o recargas.</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="(movementsEnabled$ | async) ?? true"
+            (ionChange)="onMovementsToggle($event)">
+          </ion-toggle>
+        </ion-item>
+        <!-- 🔔 Ir al historial de notificaciones -->
+        <ion-item
+          button
+          routerLink="/notifications"
+          routerDirection="forward"
+          routerLinkActive="menu-item-active">
+          <ion-icon slot="start" name="notifications-outline"></ion-icon>
+          <ion-label>Historial de Notificaciones</ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Seguridad -->
+    <ion-card class="settings-card">
+      <ion-card-header>
+        <ion-card-title>Seguridad</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <!-- Estado 1: solo botón -->
+        <ng-container *ngIf="!changingPassword; else changePasswordBlock">
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="toggleChangePassword()">
+            Cambiar contraseña
+          </ion-button>
+        </ng-container>
+
+        <!-- Estado 2: formulario inline -->
+        <ng-template #changePasswordBlock>
+          <form
+            [formGroup]="changePasswordForm"
+            (ngSubmit)="submitChangePassword()"
+            class="change-password-form">
+
+            <ion-item lines="full" class="ion-margin-bottom">
+              <ion-input
+                label="Contraseña actual"
+                labelPlacement="stacked"
+                type="password"
+                formControlName="currentPassword">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="full" class="ion-margin-bottom">
+              <ion-input
+                label="Nueva contraseña"
+                labelPlacement="stacked"
+                type="password"
+                formControlName="newPassword">
+              </ion-input>
+            </ion-item>
+
+            <ion-item lines="full" class="ion-margin-bottom">
+              <ion-input
+                label="Repetir nueva contraseña"
+                labelPlacement="stacked"
+                type="password"
+                formControlName="confirmPassword">
+              </ion-input>
+            </ion-item>
+
+            <ion-text
+              color="danger"
+              *ngIf="passwordMismatch && changePasswordForm.touched">
+              <p>Las contraseñas no coinciden.</p>
+            </ion-text>
+
+            <div class="change-password-actions">
+              <ion-button
+                type="button"
+                fill="clear"
+                (click)="toggleChangePassword()">
+                Cancelar
+              </ion-button>
+
+              <ion-button
+                type="submit"
+                [disabled]="changePasswordForm.invalid">
+                Guardar
+              </ion-button>
+            </div>
+          </form>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Ayuda y soporte -->
+    <ion-card class="settings-card">
+      <ion-card-header>
+        <ion-card-title>Ayuda y soporte</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="support-text">
+          Si tenés problemas con el saldo, las tarjetas o los datos
+          de tus hijos, contactate con la escuela o el administrador del kiosco.
+        </p>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          (click)="onContactSupport()">
+          Contactar soporte
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Cerrar sesión -->
+    <div class="logout-section">
+      <ion-button
+        expand="block"
+        fill="clear"
+        (click)="onLogout()"
+        style="color: red;">
+        Cerrar sesión
+      </ion-button>
+    </div>
+
+    <!-- App footer -->
+    <div style="text-align: center; padding: 20px 0 32px; opacity: 0.5;">
+      <p style="font-size: 0.72rem; margin: 0;">KioEdu App v1.0.0</p>
+      <div style="display: flex; justify-content: center; gap: 16px; margin-top: 6px;">
+        <a routerLink="/terms" style="font-size: 0.7rem; color: var(--mk-text-subtle); text-decoration: none;">Términos</a>
+        <a routerLink="/privacy" style="font-size: 0.7rem; color: var(--mk-text-subtle); text-decoration: none;">Privacidad</a>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

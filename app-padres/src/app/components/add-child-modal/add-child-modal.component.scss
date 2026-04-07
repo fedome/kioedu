@@ -1,0 +1,88 @@
+.modal-root {
+  background: var(--mk-modal-solid-bg, #ffffff);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-card {
+  --background: transparent;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* Títulos */
+.modal-title {
+  text-align: center;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.modal-subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 18px;
+}
+
+/* Filas de dos columnas */
+.row-split {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* tipo chico, número grande */
+  gap: 10px;
+
+  &:last-of-type {
+    grid-template-columns: 1fr 1fr; /* curso/división */
+  }
+}
+
+/* Input date para que quede igual a los demás */
+.date-input {
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+
+  .native-input {
+    font-size: 0.95rem;
+  }
+
+  /* opcional: estilito al icono del calendario (Chrome) */
+  .native-input::-webkit-calendar-picker-indicator {
+    opacity: 0.7;
+    cursor: pointer;
+  }
+}
+
+/* Botón principal */
+.confirm-button {
+  margin-top: 16px;
+  --border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Cancelar */
+.cancel-button {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Inputs / selects outline */
+ion-input,
+ion-select {
+  --border-radius: 8px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+}
+
+.division-input {
+  text-transform: uppercase;
+
+  .native-input {
+    text-transform: uppercase;
+  }
+}
+

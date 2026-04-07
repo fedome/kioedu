@@ -1,0 +1,101 @@
+<div class="topup-modal-container">
+  
+  <ng-container *ngIf="!isTicketView">
+    <!-- Header -->
+    <div class="modal-head">
+      <h2 class="title">¿Cuánto querés cargar?</h2>
+      <p class="subtitle">Para <strong>{{ child.firstName }} {{ child.lastName }}</strong></p>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Quick Select Pills -->
+      <div class="amount-pills">
+        <div *ngFor="let amt of amounts" class="amount-pill" [class.selected]="selectedAmount === amt"
+          (click)="selectAmount(amt)">
+          <span>$ {{ amt | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- Custom Input -->
+      <div class="form-section">
+        <label class="section-label">Otro monto</label>
+        <form [formGroup]="form">
+          <ion-item lines="none" class="custom-input-item">
+            <span slot="start" class="currency-symbol">$</span>
+            <ion-input formControlName="amount" type="text" inputmode="decimal" placeholder="0"
+              (ionInput)="onAmountInput($event)"></ion-input>
+          </ion-item>
+        </form>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="form-section">
+        <label class="section-label">Método de pago</label>
+        <div class="methods-list">
+          <div *ngFor="let method of paymentMethods" class="method-item rounded-card"
+            [class.selected]="selectedMethod === method.id" (click)="selectMethod(method.id)">
+            <div class="method-icon-wrap" [style.background-color]="method.color + '15'">
+              <ion-icon [name]="method.icon" [style.color]="method.color"></ion-icon>
+            </div>
+            <span class="method-name">{{ method.name }}</span>
+            <div class="radio-indicator">
+              <div class="radio-inner" *ngIf="selectedMethod === method.id"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <ion-button expand="block" class="pill-button btn-primary shadow-sm" [disabled]="form.invalid" (click)="confirm()">
+        Confirmar Carga
+      </ion-button>
+      <ion-button fill="clear" expand="block" color="danger" (click)="cancel()" class="back-button">
+        CANCELAR
+      </ion-button>
+    </div>
+  </ng-container>
+
+  <!-- Ticket View (Cash Only) -->
+  <ng-container *ngIf="isTicketView">
+    <div class="ticket-view">
+      <div class="success-icon-wrap">
+        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+      </div>
+      
+      <h2 class="ticket-title">Solicitud Generada</h2>
+      <p class="ticket-subtitle">Presentá este ticket en el kiosco para completar la carga.</p>
+
+      <div class="ticket-card rounded-card">
+        <div class="ticket-row">
+          <span class="label">Monto a abonar</span>
+          <span class="value main-value">$ {{ ticketAmount / 100 | number:'1.2-2' }}</span>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-row">
+          <span class="label">Referencia</span>
+          <span class="value ref-code">#{{ ticketRef }}</span>
+        </div>
+        <div class="ticket-row">
+          <span class="label">Alumno</span>
+          <span class="value">{{ child.firstName }} {{ child.lastName }}</span>
+        </div>
+      </div>
+
+      <div class="ticket-instructions">
+        <p>1. Dirigite al kiosco del colegio.</p>
+        <p>2. Indicá el nombre del alumno o el código de referencia.</p>
+        <p>3. Entregá el efectivo al cajero.</p>
+        <p>4. Una vez aprobado, el saldo se acreditará al instante.</p>
+      </div>
+
+      <ion-button expand="block" class="pill-button btn-primary" (click)="cancel()">
+        ENTENDIDO
+      </ion-button>
+    </div>
+  </ng-container>
+
+</div>

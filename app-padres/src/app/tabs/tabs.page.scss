@@ -1,0 +1,42 @@
+ion-tabs {
+    ion-tab-bar {
+        --background: var(--mk-card-bg);
+        --border: none;
+        border-top: 1px solid var(--mk-card-border);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        padding: 4px 0 8px;
+
+        ion-tab-button {
+            --color: var(--mk-text-subtle);
+            --color-selected: var(--ion-color-secondary);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+
+            ion-icon {
+                font-size: 1.4rem;
+                margin-bottom: 2px;
+            }
+
+            &[aria-selected="true"] {
+                position: relative;
+                ion-icon {
+                    filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.4));
+                }
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 2px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 4px;
+                    height: 4px;
+                    background: var(--ion-color-secondary);
+                    border-radius: 50%;
+                    box-shadow: 0 0 6px var(--ion-color-secondary);
+                }
+            }
+        }
+    }
+}

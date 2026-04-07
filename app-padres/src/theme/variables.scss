@@ -1,0 +1,82 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+:root {
+  --ion-font-family: 'Outfit', sans-serif;
+  /* Primary: KioEdu Navy Blue (#003B73) - Aligned with Logo */
+  --ion-color-primary: #003B73;
+  --ion-color-primary-rgb: 0, 59, 115;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #003465;
+  --ion-color-primary-tint: #1a4f81;
+
+  /* Accent: KioEdu Mint/Green (#4ade80) */
+  --ion-color-secondary: #4ade80;
+  --ion-color-secondary-rgb: 74, 222, 128;
+  --ion-color-secondary-contrast: #ffffff;
+
+  /* Status Colors */
+  --ion-color-success: #10b981;
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-warning: #f59e0b;
+}
+
+/* ============================
+   LIGHT MODE (default when no .dark)
+   ============================ */
+body:not(.dark) {
+  --ion-background-color: #f0f4f8;
+  --ion-background-color-rgb: 240, 244, 248;
+  --ion-text-color: #1a1a2e;
+
+  --mk-page-bg: linear-gradient(180deg, #e8edf4 0%, #f0f4f8 100%);
+  --mk-card-bg: rgba(255, 255, 255, 0.85);
+  --mk-card-shadow: 0 4px 16px rgba(0, 59, 115, 0.08);
+  --mk-card-border: rgba(0, 59, 115, 0.08);
+  --mk-modal-solid-bg: #f8fafc;
+  --mk-glass-blur: blur(16px);
+
+  --mk-text-main: #1a1a2e;
+  --mk-text-subtle: #64748b;
+
+  --mk-input-bg: rgba(0, 0, 0, 0.03);
+  --mk-input-border: rgba(0, 59, 115, 0.12);
+  --mk-input-text: #1a1a2e;
+
+  ion-tab-bar {
+    --background: rgba(255, 255, 255, 0.9);
+    --border-top: 1px solid rgba(0, 59, 115, 0.08);
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* ============================
+   DARK MODE
+   ============================ */
+body.dark {
+  --ion-background-color: #040d1a;
+  --ion-background-color-rgb: 4, 13, 26;
+  --ion-text-color: rgba(255, 255, 255, 0.95);
+
+  --mk-page-bg: radial-gradient(1200px 800px at 20% 0%, #001e3c 0%, #040d1a 60%, #02060c 100%);
+  --mk-card-bg: rgba(2, 10, 20, 0.85);
+  --mk-card-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --mk-card-border: rgba(255, 255, 255, 0.08);
+  --mk-modal-solid-bg: #0f172a;
+  --mk-glass-blur: blur(16px);
+
+  --mk-text-main: rgba(255, 255, 255, 0.95);
+  --mk-text-subtle: rgba(255, 255, 255, 0.65);
+
+  --mk-input-bg: rgba(255, 255, 255, 0.04);
+  --mk-input-border: rgba(255, 255, 255, 0.08);
+  --mk-input-text: #ffffff;
+
+  ion-tab-bar {
+    --background: rgba(4, 13, 26, 0.9);
+    --border-top: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+  }
+}

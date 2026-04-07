@@ -1,0 +1,203 @@
+<ion-header class="dashboard-header ion-no-border" *ngIf="!loadedChild">
+  <ion-toolbar class="dashboard-toolbar">
+
+
+    <ion-title class="header-title-center">
+      <div class="header-title">
+        <span class="header-kicker">Resumen</span>
+        <span class="header-main">Actividad</span>
+      </div>
+    </ion-title>
+
+    <app-notifications-bell slot="end"></app-notifications-bell>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="activity-page">
+  <ion-refresher slot="fixed" (ionRefresh)="loadActivity($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="activity-wrapper ion-padding">
+
+    <!-- MODO 2: GLOBAL ACTIVITY SUMMARY -->
+    <!-- =============================== -->
+    <ng-container *ngIf="!loadedChild">
+      <!-- Barra de filtros (trigger del popover) -->
+      <ion-item lines="none" button (click)="openFilters()" class="filters-chip">
+        <ion-icon name="options-outline"></ion-icon>
+        <ion-label>
+          Filtros
+          <p>
+            {{ selectedChildId === 'all' ? 'Todos los hijos' : '1 hijo' }} •
+            {{
+            selectedType === 'ALL'
+            ? 'Todos los tipos'
+            : (selectedType === 'SALE' ? 'Gastos' : 'Recargas')
+            }} •
+            {{
+            selectedDate
+            ? (selectedDate | date: 'dd/MM/yyyy')
+            : 'Todas las fechas'
+            }}
+          </p>
+        </ion-label>
+        <ion-icon slot="end" name="chevron-down-outline"></ion-icon>
+      </ion-item>
+
+      <div class="activity-summary" *ngIf="!loading && filteredItems.length > 0">
+        <div class="summary-block-spent">
+          <span class="summary-label">Gastado</span>
+          <span class="summary-value">
+            $ {{ totalSpent / 100 | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="summary-block-recharged">
+          <span class="summary-label">Recargado</span>
+          <span class="summary-value positive">
+            $ {{ totalTopup / 100 | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Modal con filtros -->
+    <ion-modal #filtersModal class="auto-height-modal" mode="ios">
+      <ng-template>
+        <div class="mk-modal-container">
+          <div class="mk-modal-header">
+            <h3 class="filters-title">Filtrar Actividad</h3>
+            <p class="filters-subtitle">Personalizá tu búsqueda</p>
+          </div>
+
+          <div class="mk-modal-content ion-padding">
+            <!-- Selector de Hijo -->
+            <div class="filter-group">
+              <span class="filter-label">Alumno</span>
+              <ion-item lines="none" class="filter-item-rounded">
+                <ion-icon name="person-outline" slot="start"></ion-icon>
+                <ion-select [value]="draftChildId" (ionChange)="onChildDraftChange($event)" interface="popover" toggleIcon="chevron-down-outline">
+                  <ion-select-option value="all">Todos los hijos</ion-select-option>
+                  <ion-select-option *ngFor="let opt of childOptions" [value]="opt.id">
+                    {{ opt.name }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </div>
+
+            <!-- Selector de Tipo -->
+            <div class="filter-group">
+              <span class="filter-label">Tipo de movimiento</span>
+              <ion-segment [value]="draftType" (ionChange)="onTypeDraftChange($event)" class="mk-segment-rounded">
+                <ion-segment-button value="ALL">
+                  <ion-label>Todos</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="SALE">
+                  <ion-label>Gastos</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="TOPUP">
+                  <ion-label>Recargas</ion-label>
+                </ion-segment-button>
+              </ion-segment>
+            </div>
+
+            <!-- Selector de Fecha -->
+            <div class="filter-group">
+              <span class="filter-label">Fecha</span>
+              <ion-item lines="none" class="filter-item-rounded">
+                <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                <ion-input type="date" [value]="draftDate" (ionChange)="onDraftDateChange($event)" placeholder="Elegir fecha"></ion-input>
+                <ion-button slot="end" fill="clear" color="medium" (click)="clearDraftDate()" *ngIf="draftDate">
+                  <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </ion-item>
+            </div>
+          </div>
+
+          <div class="mk-modal-footer">
+            <ion-button fill="clear" color="medium" (click)="onCancelFilters(filtersModal)" class="flex-1">
+              Cancelar
+            </ion-button>
+            <ion-button fill="solid" (click)="onApplyFilters(filtersModal)" class="flex-2 pill-button">
+              Aplicar Filtros
+            </ion-button>
+          </div>
+        </div>
+      </ng-template>
+    </ion-modal>
+
+    <!-- Skeleton mientras carga -->
+    <div *ngIf="loading" class="activity-list skeleton-list">
+      <div class="movement-group-card rounded-card">
+        <div *ngFor="let i of [1, 2, 3, 4, 5]" class="movement-item skeleton-item">
+          <div class="activity-icon skeleton-icon">
+            <ion-skeleton-text animated style="width: 100%; height: 100%; margin: 0;"></ion-skeleton-text>
+          </div>
+          <div class="movement-info">
+            <div class="top-row">
+              <ion-skeleton-text animated style="width: 50%; height: 16px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 25%; height: 16px;"></ion-skeleton-text>
+            </div>
+            <div class="mid-row">
+              <ion-skeleton-text animated style="width: 30%; height: 12px; margin-top: 4px;"></ion-skeleton-text>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de movimientos -->
+    <ion-list class="activity-list" lines="none" *ngIf="!loading && filteredItems.length > 0">
+      <div class="movement-group-card rounded-card">
+        <ion-item button [detail]="false" *ngFor="let m of filteredItems; let last = last" class="movement-item" 
+          [class.no-border]="last" [class.pending-item]="m.status === 'PENDING'" (click)="openDetail(m)">
+          <!-- Icono de actividad similar al dashboard -->
+          <div class="activity-icon" [class.bg-orange]="isDebit(m)" [class.bg-green]="!isDebit(m)">
+            <ion-icon [name]="isDebit(m) ? 'fast-food-outline' : 'card-outline'"></ion-icon>
+          </div>
+
+          <div class="movement-info">
+            <div class="top-row">
+              <span class="item-name">
+                {{ m.paymentMethod === 'TRANSFER' 
+                   ? (isDebit(m) ? 'Transferencia enviada' : 'Transferencia recibida') 
+                   : (isDebit(m) ? m.description || 'Consumo Kiosco' : 'Recarga de Saldo') }}
+              </span>
+              <span class="amount" [class.debit]="isDebit(m)" [class.credit]="!isDebit(m)">
+                {{ getAmountSign(m) }}
+                $ {{ m.amountCents / 100 | number: '1.2-2' }}
+              </span>
+            </div>
+
+            <div class="mid-row">
+              <span class="activity-status-badge pending" *ngIf="m.status === 'PENDING'">
+                Pendiente de aprobación
+              </span>
+              <span class="child-sub" *ngIf="!loadedChild">{{ m.childName }} • </span>
+              <span class="date">
+                {{ m.createdAt | date: 'shortTime' }}
+              </span>
+            </div>
+          </div>
+        </ion-item>
+      </div>
+    </ion-list>
+
+    <!-- Sin movimientos en general -->
+    <div *ngIf="!loading && items.length === 0" class="empty-state">
+      <h3>Sin movimientos todavía</h3>
+      <p>
+        Cuando {{ loadedChild ? loadedChild.firstName : 'tus hijos' }} use el kiosco vas a ver acá sus consumos y
+        recargas.
+      </p>
+    </div>
+
+    <!-- Hay movimientos, pero no matchean los filtros -->
+    <div *ngIf="!loading && items.length > 0 && filteredItems.length === 0" class="empty-state">
+      <h3>No hay movimientos para estos filtros</h3>
+      <p>Probá cambiar el hijo, el tipo o la fecha.</p>
+    </div>
+
+  </div>
+</ion-content>

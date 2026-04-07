@@ -1,0 +1,74 @@
+<!-- card-info-modal.component.html -->
+<div class="card-modal">
+  <h2 class="title">Activar tarjeta</h2>
+
+  <p class="subtitle">
+    Para que {{ firstName }} pueda comprar en el kiosco escolar,
+    necesitás activar una tarjeta KioEdu.
+  </p>
+
+  <div class="options-list">
+    <!-- NFC -->
+    <button type="button" class="option-card" (click)="selectOption('nfc')">
+      <div class="icon-chip nfc">
+        <ion-icon name="wifi-outline"></ion-icon>
+      </div>
+
+      <div class="option-text">
+        <h3>Escanear tarjeta (NFC)</h3>
+        <p>Apoyá la tarjeta en la parte trasera del teléfono.</p>
+      </div>
+
+      <ion-icon
+        name="chevron-forward-outline"
+        class="chevron"
+      ></ion-icon>
+    </button>
+
+    <!-- Código UID -->
+    <button type="button" class="option-card" (click)="selectOption('code')">
+      <div class="icon-chip code">
+        <ion-icon name="key-outline"></ion-icon>
+      </div>
+
+      <div class="option-text">
+        <h3>Ingresar código de tarjeta</h3>
+        <p>Usá el código UID impreso o provisto por la escuela.</p>
+      </div>
+
+      <ion-icon
+        name="chevron-forward-outline"
+        class="chevron"
+      ></ion-icon>
+    </button>
+
+    <!-- Activar en kiosco -->
+    <button type="button" class="option-card" (click)="selectOption('kiosk')">
+      <div class="icon-chip kiosk">
+        <ion-icon name="storefront-outline"></ion-icon>
+      </div>
+
+      <div class="option-text">
+        <h3>Activar en el kiosco escolar</h3>
+        <p>
+          Acercate a la caja con la tarjeta y la activan desde la terminal.
+        </p>
+      </div>
+
+      <ion-icon
+        name="chevron-forward-outline"
+        class="chevron"
+      ></ion-icon>
+    </button>
+  </div>
+
+  <ion-button
+    expand="block"
+    fill="clear"
+    color="danger"
+    (click)="close()"
+    class="close-button"
+  >
+    CANCELAR
+  </ion-button>
+</div>

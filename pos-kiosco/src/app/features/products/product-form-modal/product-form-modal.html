@@ -1,0 +1,261 @@
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-100 flex flex-col max-h-[90vh]">
+
+    <div class="bg-white border-b border-slate-100 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
+      <div>
+        <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+          {{ product ? 'Editar Producto' : 'Nuevo Producto' }}
+        </h2>
+        <p class="text-slate-500 text-xs mt-0.5">Completa los detalles del inventario</p>
+      </div>
+      <button (click)="cancel.emit()"
+        class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full p-2 transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-6 overflow-y-auto">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nombre del
+            Producto</label>
+          <input type="text" [(ngModel)]="formData.name"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+            placeholder="Ej: Coca Cola 500ml">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Código de Barras</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <input type="text" [(ngModel)]="formData.barcode"
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono"
+              placeholder="Escanea o escribe...">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Categoría</label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <select [(ngModel)]="formData.categoryId"
+                class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer text-slate-700 font-medium">
+                <option [ngValue]="null">Sin Categoría</option>
+                @for (cat of categories; track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+              <!-- Custom Arrow -->
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+              </div>
+            </div>
+
+            <button (click)="openCategoryManager()"
+              class="px-3 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-600 rounded-xl transition-colors shadow-sm"
+              title="Gestionar Categorías">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Distribuidor
+            Favorito</label>
+          <div class="relative">
+            <select [(ngModel)]="formData.supplierId"
+              class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer text-slate-700 font-medium">
+              <option [ngValue]="null">Sin Distribuidor</option>
+              @for (sup of suppliers; track sup.id) {
+              <option [ngValue]="sup.id">{{ sup.name }}</option>
+              }
+            </select>
+            <!-- Custom Arrow -->
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+              </svg>
+            </div>
+          </div>
+          <p class="text-[10px] text-indigo-500 mt-1">Se usará para pedidos automáticos de stock bajo.</p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Imagen del
+            Producto</label>
+
+          <div
+            class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center gap-4 transition-all hover:border-indigo-100 min-h-[200px]">
+
+            <!-- Vista Previa Imagen -->
+            @if (formData.imageUrl) {
+            <div class="relative group w-48 h-48 rounded-lg overflow-hidden shadow-sm border border-slate-200 bg-white">
+              <img [src]="formData.imageUrl" (error)="formData.imageUrl = ''" alt="Vista previa"
+                class="w-full h-full object-cover">
+
+              <!-- Overlay de Acciones -->
+              <div
+                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button (click)="generateAIImage()" [disabled]="generatingImage"
+                  class="p-2 bg-white/90 hover:bg-white text-indigo-600 rounded-full shadow-lg transition-transform hover:scale-110"
+                  title="Regenerar con IA">
+                  <svg *ngIf="!generatingImage" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <svg *ngIf="generatingImage" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </button>
+                <button (click)="formData.imageUrl = ''"
+                  class="p-2 bg-white/90 hover:bg-white text-red-500 rounded-full shadow-lg transition-transform hover:scale-110"
+                  title="Eliminar imagen">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400">Generado con IA o URL externa</p>
+            }
+
+            <!-- Estado Vacio / Generador -->
+            @else {
+            <div class="text-center space-y-3">
+              <div
+                class="w-16 h-16 bg-indigo-50 text-indigo-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+
+              <button (click)="generateAIImage()" [disabled]="generatingImage || !formData.name"
+                class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200/50 transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:shadow-none">
+                @if (generatingImage) {
+                <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                Generando...
+                } @else {
+                <span>✨ Generar con IA</span>
+                }
+              </button>
+              <p class="text-xs text-slate-400 max-w-[200px] mx-auto">
+                El sistema creará una imagen única basada en el nombre del producto.
+              </p>
+
+              <!-- Boton discreto para URL manual -->
+              <button (click)="showUrlInput = !showUrlInput"
+                class="text-[10px] text-slate-400 hover:text-indigo-500 underline decoration-dashed">
+                {{ showUrlInput ? 'Ocultar URL' : 'Ingresar URL de imagen manualmente' }}
+              </button>
+
+              <!-- Input URL Manual (Oculto por defecto) -->
+              @if (showUrlInput) {
+              <input type="text" [(ngModel)]="formData.imageUrl"
+                class="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none animate-in fade-in slide-in-from-top-2"
+                placeholder="https://ejemplo.com/imagen.jpg">
+              }
+            </div>
+            }
+
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">
+          Estrategia de Precios
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1">Costo ($)</label>
+            <input type="number" [(ngModel)]="costInput" (ngModelChange)="calculatePrice()"
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all font-medium"
+              placeholder="0.00">
+            <p class="text-[10px] text-slate-400 mt-1">Lo que pagas al proveedor</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-indigo-600 mb-1">Margen (%)</label>
+            <div class="relative">
+              <input type="number" [(ngModel)]="marginInput" (ngModelChange)="calculatePrice()"
+                class="w-full px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold text-indigo-700 text-center"
+                placeholder="0">
+              <div class="absolute right-3 top-2 pointer-events-none text-indigo-400 text-xs font-bold">%</div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1 text-center">Tu ganancia</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-emerald-600 mb-1">Precio Venta ($)</label>
+            <input type="number" [(ngModel)]="priceInput" (ngModelChange)="calculateMargin()"
+              class="w-full px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all font-black text-emerald-800 text-right text-lg"
+              placeholder="0.00">
+            <p class="text-[10px] text-slate-400 mt-1 text-right">Precio al alumno</p>
+          </div>
+
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alerta de Stock
+          Mínimo</label>
+        <div class="flex items-center gap-4">
+          <input type="number" [(ngModel)]="formData.minStock"
+            class="w-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+            placeholder="5">
+          <span class="text-xs text-slate-400">El sistema avisará cuando queden menos de esta cantidad.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-50 p-6 border-t border-slate-100 flex justify-end gap-3">
+      <button (click)="cancel.emit()"
+        class="px-6 py-3 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+        Cancelar
+      </button>
+
+      <button (click)="submit()" [disabled]="loading"
+        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all disabled:opacity-50 disabled:shadow-none flex items-center gap-2">
+        @if (loading) {
+        <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        }
+        {{ product ? 'Guardar Cambios' : 'Crear Producto' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+@if (showCategoryManager) {
+<app-category-manager-modal (closeModel)="onCategoryManagerClosed()"></app-category-manager-modal>
+}

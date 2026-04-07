@@ -1,0 +1,171 @@
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-100 flex flex-col max-h-[90vh]">
+
+    <div class="bg-white border-b border-slate-100 px-6 py-5 flex justify-between items-center sticky top-0 z-10">
+      <div>
+        <h2 class="text-xl font-bold text-slate-800 tracking-tight">Carga de Saldo</h2>
+        <p class="text-slate-500 text-xs mt-0.5">Escanea tarjeta o busca por nombre</p>
+      </div>
+      <button (click)="cancel.emit()" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full p-2 transition-colors">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-6 space-y-6 overflow-y-auto">
+
+      <!-- Solicitudes de Recarga Pendientes -->
+      @if (pendingTopups.length > 0) {
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 animate-in slide-in-from-top-2">
+          <div class="flex items-center gap-2 mb-3">
+            <h3 class="text-sm font-bold text-indigo-800 tracking-tight flex items-center gap-2">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+              </span>
+              Solicitudes Pendientes ({{ pendingTopups.length }})
+            </h3>
+          </div>
+          
+          <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+            @for (topup of pendingTopups; track topup.id) {
+              <div class="bg-white rounded-xl p-3 border border-indigo-100 shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="font-bold text-slate-700 text-sm">
+                    {{ topup.account?.child?.firstName }} {{ topup.account?.child?.lastName }}
+                  </p>
+                  <p class="text-xs text-slate-500">{{ topup.startedAt | date:'shortTime' }}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-bold text-indigo-600">$ {{ topup.totalCents / 100 | number:'1.2-2' }}</span>
+                  <button (click)="approvePendingTopup(topup.id)" [disabled]="loading" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-colors disabled:opacity-50">
+                    Cobrar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="relative">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Carga Manual a Alumno</label>
+
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              #searchInput
+              type="text"
+              [(ngModel)]="searchTerm"
+              (keydown.enter)="performSearch()"
+              [disabled]="!!selectedStudent"
+              placeholder="Escanea tarjeta o escribe..."
+              class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all disabled:opacity-50 disabled:bg-slate-100 uppercase"
+            >
+          </div>
+
+          @if (!selectedStudent) {
+            <button
+              (click)="performSearch()"
+              [disabled]="searching || !searchTerm"
+              class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50"
+            >
+              {{ searching ? '...' : 'Buscar' }}
+            </button>
+          }
+        </div>
+
+        @if (searchError && !searching && !selectedStudent) {
+          <div class="mt-3 bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 border border-red-100 animate-in slide-in-from-top-1">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>No se encontró ningún alumno con esos datos.</span>
+          </div>
+        }
+
+        @if (students.length > 0 && !selectedStudent) {
+          <div class="mt-2 bg-white rounded-xl shadow-xl border border-slate-100 max-h-48 overflow-y-auto z-20 animate-in fade-in slide-in-from-top-2">
+            @for (student of students; track student.id) {
+              <button (click)="selectStudent(student)" class="w-full text-left px-4 py-3 hover:bg-emerald-50 border-b border-slate-50 last:border-0 flex justify-between items-center group transition-colors">
+                <div>
+                  <span class="font-bold text-slate-700 block">{{ student.firstName }} {{ student.lastName }}</span>
+                  <span class="text-xs text-slate-400">{{ student.documentType }}: {{ student.documentNumber || '---' }}</span>
+                </div>
+                <span class="text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md font-medium">
+                  Saldo: $ {{ (student.accounts?.[0]?.balanceCents || 0) / 100 }}
+                </span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (selectedStudent) {
+        <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100 flex items-center justify-between animate-in zoom-in duration-300">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-xl shadow-sm">
+              {{ selectedStudent.firstName.charAt(0) }}
+            </div>
+            <div>
+              <p class="font-bold text-slate-800 text-lg leading-tight">{{ selectedStudent.firstName }} {{ selectedStudent.lastName }}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md font-medium">
+                  Saldo: $ {{ (selectedStudent.accounts?.[0]?.balanceCents || 0) / 100 }}
+                </span>
+                @if (selectedStudent.card?.uidHex) {
+                  <span class="text-[10px] text-slate-400 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                    Tarjeta Vinculada
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+          <button (click)="clearSearch()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:text-red-500 hover:border-red-200 transition-all shadow-sm">
+            Cambiar
+          </button>
+        </div>
+      }
+
+      <div [class.opacity-50]="!selectedStudent" [class.pointer-events-none]="!selectedStudent" class="transition-opacity duration-300">
+        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Monto a Cargar</label>
+        <div class="relative group">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-light text-2xl group-focus-within:text-emerald-500 transition-colors">$</span>
+          <input
+            type="number"
+            [(ngModel)]="amount"
+            (keydown.enter)="confirmCharge()"
+            placeholder="0"
+            class="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-bold text-3xl text-slate-800 placeholder-slate-300 transition-all"
+          >
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-50 p-6 border-t border-slate-100">
+      <button
+        (click)="confirmCharge()"
+        [disabled]="loading || !selectedStudent || !amount || amount <= 0 || !isStudentScanned"
+        class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 flex justify-center items-center gap-2"
+        [title]="!isStudentScanned ? 'Debe utilizar la tarjeta física para recargar' : ''"
+      >
+        @if (loading) {
+          <svg class="animate-spin h-5 w-5 text-current" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        }
+        {{ loading ? 'Procesando Recarga...' : 'Confirmar Carga' }}
+      </button>
+
+      <p *ngIf="selectedStudent && !isStudentScanned" class="text-[10px] sm:text-xs text-orange-600 text-center uppercase font-bold mt-3 animate-pulse">
+        ⚠️ ATENCIÓN: El escaneo fue manual. Requiere tarjeta física.
+      </p>
+    </div>
+
+  </div>
+</div>

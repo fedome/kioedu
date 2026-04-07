@@ -1,0 +1,162 @@
+:host {
+  ion-content {
+    --background: var(--mk-page-bg);
+  }
+}
+
+/* ===========================
+   SIDE MENU - KioEdu Branding
+   =========================== */
+
+.menu-header {
+  ion-toolbar {
+    --background: var(--ion-color-primary);
+    --color: #ffffff;
+    --border-width: 0;
+    min-height: 48px;
+  }
+
+  ion-buttons ion-button {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    --background: transparent;
+    --box-shadow: none;
+  }
+
+  ion-buttons ion-icon {
+    font-size: 1.3rem;
+  }
+
+  .menu-user {
+    display: flex;
+    align-items: center;
+    padding: 16px 16px 12px;
+    background: var(--ion-color-primary);
+    color: #ffffff;
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(74, 222, 128, 0.2);
+      border: 2px solid var(--ion-color-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      margin-right: 12px;
+      color: var(--ion-color-secondary);
+    }
+
+    .info h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .info p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      opacity: 0.85;
+    }
+  }
+}
+
+.menu-content {
+  --background: var(--mk-page-bg);
+}
+
+.menu-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.menu-list {
+  flex: 1 1 auto;
+  padding-top: 12px;
+
+  ion-item {
+    --background: transparent;
+    --border-radius: 14px;
+    margin: 2px 10px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      --background: rgba(74, 222, 128, 0.08);
+    }
+
+    ion-icon {
+      font-size: 1.25rem;
+      color: var(--ion-color-secondary);
+    }
+
+    ion-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--mk-text-main);
+    }
+  }
+}
+
+.menu-item-active {
+  --background: rgba(74, 222, 128, 0.12);
+
+  ion-icon {
+    color: var(--ion-color-secondary) !important;
+  }
+
+  ion-label {
+    color: var(--ion-color-secondary) !important;
+    font-weight: 700;
+  }
+}
+
+.menu-section {
+  margin-bottom: 24px;
+
+  .section-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--mk-text-subtle);
+    padding: 0 20px;
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+}
+
+.menu-spacer {
+  flex: 1;
+}
+
+.menu-divider {
+  height: 1px;
+  background: rgba(var(--mk-text-main-rgb), 0.08);
+  margin: 0 20px 16px;
+}
+
+.logout-wrapper {
+  padding: 0 10px 24px;
+}
+
+.logout-item {
+  --background: rgba(239, 68, 68, 0.08);
+  --color: #ef4444;
+  --border-radius: 14px;
+  --min-height: 48px;
+  margin: 0 10px;
+
+  ion-icon {
+    color: #ef4444;
+    font-size: 1.2rem;
+  }
+
+  ion-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+}

@@ -1,0 +1,98 @@
+<div class="container mx-auto p-6 max-w-5xl animate-in fade-in duration-300">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Gestión de Categorías</h1>
+            <p class="text-slate-500 mt-1">Administra las categorías de tus productos</p>
+        </div>
+    </div>
+
+    <!-- Create Form -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Nueva Categoría</h3>
+        <div class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-bold text-slate-500 mb-1">Nombre</label>
+                <input type="text" [(ngModel)]="newName" placeholder="Ej: Bebidas" (keydown.enter)="create()"
+                    class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
+            </div>
+            <div class="flex-[2] w-full">
+                <label class="block text-xs font-bold text-slate-500 mb-1">Descripción (Opcional)</label>
+                <input type="text" [(ngModel)]="newDescription" placeholder="Ej: Gaseosas, jugos, aguas..."
+                    (keydown.enter)="create()"
+                    class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
+            </div>
+            <button (click)="create()" [disabled]="!newName.trim()"
+                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:shadow-none shadow-lg shadow-indigo-200 h-[42px]">
+                Agregar
+            </button>
+        </div>
+    </div>
+
+    <!-- List -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-left">
+            <thead>
+                <tr
+                    class="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-4">ID</th>
+                    <th class="px-6 py-4">Nombre</th>
+                    <th class="px-6 py-4">Descripción</th>
+                    <th class="px-6 py-4 text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @for (cat of categories; track cat.id) {
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4 text-slate-400 font-mono text-xs">#{{ cat.id }}</td>
+
+                    <td class="px-6 py-4">
+                        @if (editingId === cat.id) {
+                        <input type="text" [(ngModel)]="editName"
+                            class="w-full px-2 py-1 bg-white border border-indigo-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        } @else {
+                        <span class="font-bold text-slate-700">{{ cat.name }}</span>
+                        }
+                    </td>
+
+                    <td class="px-6 py-4 text-slate-500 text-sm">
+                        @if (editingId === cat.id) {
+                        <input type="text" [(ngModel)]="editDescription"
+                            class="w-full px-2 py-1 bg-white border border-indigo-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        } @else {
+                        {{ cat.description || '-' }}
+                        }
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
+                        @if (editingId === cat.id) {
+                        <div class="flex justify-end gap-2">
+                            <button (click)="saveEdit(cat.id)"
+                                class="text-indigo-600 hover:text-indigo-800 font-bold text-sm">Guardar</button>
+                            <button (click)="cancelEdit()"
+                                class="text-slate-400 hover:text-slate-600 text-sm">Cancelar</button>
+                        </div>
+                        } @else {
+                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <!-- FIXME: opacity-0 breaks usability if not grouping rows. Removing opacity logic for simplicity -->
+                        </div>
+                        <div class="flex justify-end gap-3">
+                            <button (click)="startEdit(cat)"
+                                class="text-blue-500 hover:text-blue-700 font-medium text-sm">Editar</button>
+                            <button (click)="delete(cat.id)"
+                                class="text-red-400 hover:text-red-600 font-medium text-sm">Eliminar</button>
+                        </div>
+                        }
+                    </td>
+                </tr>
+                }
+                @empty {
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                        No hay categorías creadas.
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

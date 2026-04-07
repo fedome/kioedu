@@ -1,0 +1,21 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "..", // <-- Cambiado a ".." (el root del backend)
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  // --- AÑADIDO: Le dice a ts-jest qué config usar ---
+  "globals": {
+    "ts-jest": {
+      "tsconfig": "tsconfig.json"
+    }
+  },
+  // --- AÑADIDO: Le dice a Jest dónde están los tests ---
+  "roots": ["<rootDir>/test"],
+  "moduleNameMapper": {
+    // Esto arregla el 'src/auth/roles.guard' que falló antes
+    "^src/(.*)$": "<rootDir>/src/$1"
+  }
+}

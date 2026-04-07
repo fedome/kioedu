@@ -1,0 +1,252 @@
+:host {
+  ion-content {
+    --background: var(--mk-page-bg);
+  }
+}
+
+.login-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// ------------------------------------
+// VISTA 1: ONBOARDING
+// ------------------------------------
+.onboarding-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 32px 24px;
+}
+
+.on-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--mk-text-main);
+
+    ion-icon {
+      font-size: 1.5rem;
+      color: var(--ion-color-secondary);
+    }
+  }
+
+  .user-role {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--ion-color-secondary);
+    background: rgba(74, 222, 128, 0.1);
+    padding: 4px 12px;
+    border-radius: 99px;
+    letter-spacing: 1px;
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+}
+
+.illustration-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .hero-logo-wrap {
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 140%;
+      height: 140%;
+      background: radial-gradient(circle, rgba(74, 222, 128, 0.15) 0%, transparent 70%);
+      z-index: -1;
+    }
+
+    .hero-logo {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+    }
+  }
+}
+
+.text-content {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .main-title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: var(--mk-text-main);
+    letter-spacing: -1px;
+  }
+
+  .main-subtitle {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--mk-text-subtle);
+    padding: 0 10px;
+  }
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.trust-badges {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding-bottom: 8px;
+
+  .badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+
+    ion-icon {
+      font-size: 20px;
+      color: var(--ion-color-secondary);
+      opacity: 0.8;
+    }
+
+    span {
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: var(--mk-text-subtle);
+      letter-spacing: 1px;
+    }
+  }
+}
+
+// ------------------------------------
+// VISTA 2: LOGIN FORM
+// ------------------------------------
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 24px;
+}
+
+.login-header {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  .back-btn {
+    position: absolute;
+    left: -12px;
+    --color: var(--mk-text-main);
+    font-size: 1.4rem;
+  }
+
+  .logo-small {
+    height: 48px;
+    object-fit: contain;
+  }
+}
+
+.login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 40px;
+}
+
+.welcome-text {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .card-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--mk-text-main);
+    letter-spacing: -0.5px;
+  }
+
+  .card-subtitle {
+    font-size: 1.05rem;
+    color: var(--mk-text-subtle);
+  }
+}
+
+.login-card {
+  margin-top: 0;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--ion-color-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 4px;
+}
+
+.forgot-row {
+  text-align: right;
+  margin: -4px 0 24px;
+}
+
+.signup-block {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  margin-top: 24px;
+  color: var(--mk-text-subtle);
+
+  .link-button {
+    font-weight: 800;
+    padding: 0;
+  }
+}
+
+.login-submit {
+  margin-top: 0;
+}
+
+.eye-btn {
+  --color: var(--mk-text-subtle);
+  margin-right: -4px;
+}
+
+// Button variants
+.btn-primary {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+}
+
+.btn-outline {
+  --border-color: var(--ion-color-secondary);
+  --color: var(--mk-text-main);
+  --border-width: 1.5px;
+}

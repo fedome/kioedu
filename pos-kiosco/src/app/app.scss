@@ -1,0 +1,8 @@
+:host {
+  display: block;
+  height: 100vh;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(108,92,231,.25), transparent 60%),
+  radial-gradient(900px 500px at 80% 20%, rgba(46,204,113,.18), transparent 55%),
+  #0b1220;
+  color: var(--text);
+}

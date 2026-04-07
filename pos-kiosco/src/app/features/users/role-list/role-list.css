@@ -1,0 +1,10 @@
+/* Reutilizamos los estilos de user-list.css por consistencia */
+@import '../user-list/user-list.css';
+
+.btn-icon.danger {
+    color: #ef4444;
+}
+
+.btn-icon.danger:hover {
+    background-color: #fef2f2;
+}
