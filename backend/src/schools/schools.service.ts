@@ -19,9 +19,10 @@ export class SchoolsService {
     return school;
   }
 
-  /** Listar todos los colegios (admin) */
+  /** Listar todos los colegios activos (admin) */
   async findAll() {
     return this.prisma.school.findMany({
+      where: { isActive: true },
       include: {
         _count: {
           select: { children: true, kiosks: true, owners: true },
@@ -55,9 +56,21 @@ export class SchoolsService {
     });
   }
 
-  /** Elimiar colegio (admin) */
+  /** Desactivar colegio (soft delete) */
   async delete(id: number) {
-    return this.prisma.school.delete({ where: { id } });
+    return this.prisma.$transaction(async (tx) => {
+      // Suspender todos los kioscos del colegio
+      await tx.kiosk.updateMany({
+        where: { schoolId: id },
+        data: { subscriptionActive: false },
+      });
+
+      // Soft delete del colegio
+      return tx.school.update({
+        where: { id },
+        data: { isActive: false },
+      });
+    });
   }
 
   /** Generar código de invitación aleatorio */

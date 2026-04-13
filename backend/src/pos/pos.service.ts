@@ -644,8 +644,8 @@ export class PosService {
 
             // 2. Procesar Items y Stock
             for (const itemDto of dto.items) {
-                const product = await tx.product.findUnique({
-                    where: { id: itemDto.productId },
+                const product = await tx.product.findFirst({
+                    where: { id: itemDto.productId, ownerId: ownerId },
                     include: { batches: { orderBy: { expirationDate: 'asc' } } }
                 });
 
@@ -863,7 +863,7 @@ export class PosService {
         // Limpiamos el término
         const q = term.trim();
 
-        return this.prisma.child.findMany({
+        const students = await this.prisma.child.findMany({
             where: {
                 isActive: true, // Solo alumnos activos
                 OR: [
@@ -882,6 +882,23 @@ export class PosService {
             },
             take: 10 // Limitamos a 10 resultados
         });
+
+        return students.map(s => this.maskStudentData(s));
+    }
+
+    /**
+     * Obfuscate sensitive student identity data to prevent leakage on POS
+     */
+    private maskStudentData(child: any) {
+        const lastNameInitial = child.lastName ? child.lastName.trim().charAt(0) + '.' : '';
+        const alias = `${child.firstName} ${lastNameInitial}`.trim();
+
+        return {
+            ...child,
+            documentNumber: '***', // Prevents DNI leakage
+            lastName: lastNameInitial, // Changes "Perez" to "P."
+            alias: alias // Front-end ready alias "Juan P."
+        };
     }
 
     /**
@@ -902,7 +919,7 @@ export class PosService {
             where.isActive = true; // Full sync default
         }
 
-        return this.prisma.child.findMany({
+        const students = await this.prisma.child.findMany({
             where,
             include: {
                 accounts: { where: { ownerId } },
@@ -910,6 +927,8 @@ export class PosService {
                 dailyLimit: true
             }
         });
+
+        return students.map(s => this.maskStudentData(s));
     }
 
     /**
@@ -1019,7 +1038,7 @@ export class PosService {
             }
         });
         if (!student) throw new NotFoundException('Alumno no encontrado');
-        return student;
+        return this.maskStudentData(student);
     }
 
     async getStudentTransactions(studentId: number, ownerId: number) {

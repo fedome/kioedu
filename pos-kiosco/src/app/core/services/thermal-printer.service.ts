@@ -150,7 +150,32 @@ export class ThermalPrinterService {
       const method = transaction.paymentMethod === 'CASH' ? 'Efectivo' : 'Saldo/Fiado';
       await this.printLine(`Medio de Pago: ${method}`);
 
-      // 6. Pie y Corte de Papel
+      // 6. Validaciones AFIP (CAE)
+      if (transaction.invoiceCae) {
+        await this.sendCommand(this.cmds.ALIGN_CENTER);
+        await this.printLine('--------------------------------');
+        const tipoFactura = transaction.invoiceType === 6 ? 'Factura B' : 
+                            transaction.invoiceType === 11 ? 'Factura C' : 
+                            transaction.invoiceType === 1 ? 'Factura A' : 'Ticket Factura';
+        await this.sendCommand(this.cmds.BOLD_ON);
+        await this.printLine(tipoFactura);
+        await this.sendCommand(this.cmds.BOLD_OFF);
+        // El CUIT del comercio deberia configurarse/pasarse, pero dejamos esto base:
+        // await this.printLine(`CUIT: ${cuitComercio}`);
+        await this.printLine(`CAE: ${transaction.invoiceCae}`);
+        
+        let caeExpiry = '-';
+        if (transaction.invoiceCaeExpiry) {
+           caeExpiry = new Date(transaction.invoiceCaeExpiry).toLocaleDateString('es-AR');
+        }
+        await this.printLine(`Vto CAE: ${caeExpiry}`);
+      } else {
+        await this.sendCommand(this.cmds.ALIGN_CENTER);
+        await this.printLine('--------------------------------');
+        await this.printLine('DOCUMENTO NO VALIDO COMO FACTURA');
+      }
+
+      // 7. Pie y Corte de Papel
       await this.sendCommand(this.cmds.ALIGN_CENTER);
       await this.printLine(' ');
       await this.printLine('¡Gracias por su compra!');

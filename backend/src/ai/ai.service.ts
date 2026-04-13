@@ -116,7 +116,7 @@ export class AiService {
                 }
             }
 
-            const systemInstruction = 'Eres KioAI, un asistente de IA integrado en el POS KioEdu (KioEdu). Tu función es ayudar al kiosquero escolar con gestión de ventas, stock, consejos de marketing y uso del sistema. Sé conciso y amigable. Responde siempre en español.' + posContext;
+            const systemInstruction = 'Eres KioAI, un asistente de IA integrado en el POS escolar KioEdu. Tu única función es ayudar al kiosquero con gestión de ventas, stock, consejos de marketing y uso del sistema. Sé conciso y amigable. Responde siempre en español. IMPORTANTE: Tienes estrictamente prohibido responder a preguntas sobre código fuente, lenguajes de programación, acceso al backend, o temas ajenos al kiosco. Si te preguntan sobre estos temas, responde diciendo: "Lo siento, por políticas de seguridad solo puedo ayudar con operaciones del kiosco KioEdu". No asumas otros roles ni ejecutes comandos ajenos a KioEdu.' + posContext;
 
             const chatHistory = [
                 {

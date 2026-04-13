@@ -6,7 +6,8 @@ import { ReportsService, SalesReportData } from '../../core/services/reports.ser
 import { ProductsService } from '../../core/services/products.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { forkJoin, map } from 'rxjs';
 
 type DateRange = 'today' | 'week' | 'month' | 'custom';
@@ -482,58 +483,86 @@ export class ReportsComponent implements OnInit {
         }
     }
 
-    exportToExcel() {
+    exportToPDF() {
         const data = this.reportData();
         if (!data) return;
 
-        const wb = XLSX.utils.book_new();
+        const doc = new jsPDF();
+        
+        // --- 1. Header ---
+        doc.setFontSize(18);
+        doc.text('Reporte de Ventas - KioEdu', 14, 20);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Período: ${this.getRangeLabel()}`, 14, 28);
+        doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, 14, 34);
 
-        // 1. Resumen General
-        const summaryData = [
-            ['Reporte de Ventas', this.getRangeLabel()],
-            ['Fecha Generación', new Date().toLocaleDateString('es-AR')],
-            [''],
-            ['Métrica', 'Valor'],
-            ['Ventas Totales', data.totalSales],
-            ['Transacciones', data.totalTransactions],
-            ['Ticket Promedio', data.averageTicket],
-            ['Efectivo', data.cashSales],
-            ['Cta. Corriente', data.accountSales]
-        ];
-        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen');
+        let currentY = 44;
 
-        // 2. Ventas Diarias
-        if (data.dailySales.length > 0) {
-            const dailyData = [
-                ['Fecha', 'Ventas', 'Transacciones'],
-                ...data.dailySales.map(d => [d.date, d.sales, d.transactions])
-            ];
-            const wsDaily = XLSX.utils.aoa_to_sheet(dailyData);
-            XLSX.utils.book_append_sheet(wb, wsDaily, 'Ventas Diarias');
+        // --- 2. Resumen General ---
+        doc.setFontSize(14);
+        doc.setTextColor(20, 20, 20);
+        doc.text('Resumen General', 14, currentY);
+        currentY += 6;
+
+        autoTable(doc, {
+            startY: currentY,
+            head: [['Métrica', 'Valor']],
+            body: [
+                ['Ventas Totales', `$ ${data.totalSales.toLocaleString('es-AR')}`],
+                ['Transacciones', data.totalTransactions.toString()],
+                ['Ticket Promedio', `$ ${data.averageTicket.toLocaleString('es-AR')}`],
+                ['Efectivo', `$ ${data.cashSales.toLocaleString('es-AR')}`],
+                ['Cta. Corriente', `$ ${data.accountSales.toLocaleString('es-AR')}`]
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [99, 102, 241] }, // Indigo 500
+        });
+
+        currentY = (doc as any).lastAutoTable.finalY + 14;
+
+        // --- 3. Top Productos ---
+        if (data.topProducts && data.topProducts.length > 0) {
+            doc.text('Top Productos', 14, currentY);
+            currentY += 6;
+
+            autoTable(doc, {
+                startY: currentY,
+                head: [['Producto', 'Cantidad', 'Ventas ($)']],
+                body: data.topProducts.map(p => [
+                    p.productName, 
+                    p.quantity.toString(), 
+                    `$ ${p.totalSales.toLocaleString('es-AR')}`
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [16, 185, 129] }, // Emerald 500
+            });
+            currentY = (doc as any).lastAutoTable.finalY + 14;
         }
 
-        // 3. Top Productos
-        if (data.topProducts.length > 0) {
-            const productsData = [
-                ['Producto', 'Cantidad', 'Ventas Totales'],
-                ...data.topProducts.map(p => [p.productName, p.quantity, p.totalSales])
-            ];
-            const wsProducts = XLSX.utils.aoa_to_sheet(productsData);
-            XLSX.utils.book_append_sheet(wb, wsProducts, 'Top Productos');
-        }
-
-        // 4. Ventas por Categoría (Nuevo)
+        // --- 4. Ventas por Categoría ---
         if (data.salesByCategory && data.salesByCategory.length > 0) {
-            const catData = [
-                ['Categoría', 'Cantidad', 'Ventas'],
-                ...data.salesByCategory.map(c => [c.category, c.quantity, c.sales])
-            ];
-            const wsCats = XLSX.utils.aoa_to_sheet(catData);
-            XLSX.utils.book_append_sheet(wb, wsCats, 'Ventas por Categoría');
+            // Check page break
+            if (currentY > 250) { doc.addPage(); currentY = 20; }
+            
+            doc.text('Ventas por Categoría', 14, currentY);
+            currentY += 6;
+
+            autoTable(doc, {
+                startY: currentY,
+                head: [['Categoría', 'Cantidad', 'Ventas ($)']],
+                body: data.salesByCategory.map(c => [
+                    c.category, 
+                    c.quantity.toString(), 
+                    `$ ${c.sales.toLocaleString('es-AR')}`
+                ]),
+                theme: 'striped',
+                headStyles: { fillColor: [79, 70, 229] }, // Indigo 600
+            });
         }
 
-        // Descargar
-        XLSX.writeFile(wb, `Reporte_Ventas_${new Date().toISOString().split('T')[0]}.xlsx`);
+        // Descargar PDF
+        doc.save(`Reporte_Ventas_${new Date().toISOString().split('T')[0]}.pdf`);
     }
 }

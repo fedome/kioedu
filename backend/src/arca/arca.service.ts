@@ -71,7 +71,7 @@ export class ArcaService {
             };
         }
 
-        const { certContent, keyContent, accessToken, ...safeConfig } = config;
+        const { certContent, keyContent, ...safeConfig } = config;
         return {
             ...safeConfig,
             certContent,
@@ -85,7 +85,7 @@ export class ArcaService {
     async updateConfig(schoolId: number, data: any) {
         const allowedFields = [
             'isEnabled', 'cuit', 'fiscalCondition', 'invoiceType',
-            'salePoint', 'certContent', 'keyContent', 'accessToken',
+            'salePoint', 'certContent', 'keyContent',
             'autoInvoice', 'minAmountCents', 'environment',
             'pdfSavePath', 'businessName', 'businessAddress',
             'smtpHost', 'smtpPort', 'smtpUser', 'smtpPass', 'emailSubject',

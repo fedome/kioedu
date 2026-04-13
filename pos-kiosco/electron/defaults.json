@@ -1,6 +1,6 @@
 {
-    "apiBaseUrl": "http://localhost:3000/api/v1",
-    "kioskApiKey": "KIOSK_DEMO_KEY_123",
+    "apiBaseUrl": "http://192.168.1.33:3000/api/v1",
+    "kioskApiKey": "kiosk_1000135be7ae4453b8f2924a2030302b",
     "kioskId": 1,
     "geminiApiKey": ""
 }

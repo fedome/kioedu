@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
   // -- Stats (Dashboard) --
   async getStats() {
@@ -46,12 +47,26 @@ export class AdminService {
     });
   }
 
-  async resetUserPassword(id: number, newPassword: string) {
-    const hash = await bcrypt.hash(newPassword, 12);
-    return this.prisma.user.update({
-      where: { id },
-      data: { password: hash }
-    });
+  /**
+   * Genera un token de reset de contraseña para un usuario.
+   * El admin NO elige la nueva contraseña; el usuario la cambia él mismo.
+   */
+  async forcePasswordReset(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const resetToken = await this.jwt.signAsync(
+      { sub: user.id, email: user.email, purpose: 'password-reset' },
+      { secret: process.env.JWT_SECRET, expiresIn: '24h' },
+    );
+
+    // TODO: Integrar con servicio de email para enviar el link automáticamente
+    return {
+      message: 'Token de restablecimiento generado. Envialo al usuario.',
+      resetToken,
+      resetUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`,
+      expiresIn: '24 horas',
+    };
   }
 
   async deleteUser(id: number) {
@@ -102,16 +117,42 @@ export class AdminService {
     });
   }
 
-  async createKiosk(data: { name: string; schoolId: number; ownerId: number; apiKey: string }) {
+  async createKiosk(data: { name: string; schoolId: number; ownerId: number }) {
+    const apiKey = `kiosk_${randomUUID().replace(/-/g, '')}`;
     return this.prisma.kiosk.create({
       data: {
         name: data.name,
         schoolId: data.schoolId,
         ownerId: data.ownerId,
-        apiKey: data.apiKey,
+        apiKey,
         subscriptionActive: true
       }
     });
+  }
+
+  /**
+   * Rota la API Key de un kiosco. La anterior deja de funcionar inmediatamente.
+   */
+  async rotateKioskApiKey(id: number) {
+    const kiosk = await this.prisma.kiosk.findUnique({ where: { id } });
+    if (!kiosk) throw new NotFoundException('Kiosco no encontrado');
+
+    const newApiKey = `kiosk_${randomUUID().replace(/-/g, '')}`;
+    await this.prisma.kiosk.update({
+      where: { id },
+      data: { apiKey: newApiKey },
+    });
+
+    // Revocar todas las sesiones activas del kiosco (seguridad)
+    await this.prisma.kioskSession.updateMany({
+      where: { kioskId: id, revokedAt: null },
+      data: { revokedAt: new Date(), reason: 'api-key-rotated' },
+    });
+
+    return {
+      message: 'API Key rotada exitosamente. Actualizá la configuración del POS.',
+      apiKey: newApiKey,
+    };
   }
 
   async toggleKioskSubscription(id: number, active: boolean) {

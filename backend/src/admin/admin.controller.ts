@@ -31,12 +31,9 @@ export class AdminController {
     return this.adminService.updateUser(id, body);
   }
 
-  @Post('users/:id/password')
-  async resetUserPassword(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { password: string }
-  ) {
-    return this.adminService.resetUserPassword(id, body.password);
+  @Post('users/:id/reset-password')
+  async forcePasswordReset(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.forcePasswordReset(id);
   }
 
   @Delete('users/:id')
@@ -75,8 +72,13 @@ export class AdminController {
   }
 
   @Post('kiosks')
-  async createKiosk(@Body() body: { name: string; schoolId: number; ownerId: number; apiKey: string }) {
+  async createKiosk(@Body() body: { name: string; schoolId: number; ownerId: number }) {
     return this.adminService.createKiosk(body);
+  }
+
+  @Post('kiosks/:id/rotate-key')
+  async rotateKioskApiKey(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.rotateKioskApiKey(id);
   }
 
   @Patch('kiosks/:id/subscription')

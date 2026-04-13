@@ -13,6 +13,7 @@ import { ReconcileModalComponent } from '../reconcile-modal/reconcile-modal';
 import { ProductHistoryModalComponent } from '../product-history-modal/product-history-modal.component'; // Import
 import { CategoriesService } from '../../../core/services/categories.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-product-list',
@@ -244,5 +245,62 @@ export class ProductListComponent implements OnInit {
   onReconcileSaved() {
     this.closeReconcileModal();
     this.loadProducts(this.searchTerm);
+  }
+
+  onFileSelected(event: any) {
+    const target: DataTransfer = <DataTransfer>(event.target);
+    if (target.files.length !== 1) {
+      this.ui.showToast('No se pueden subir múltiples archivos a la vez.', 'error');
+      return;
+    }
+
+    this.loading.set(true);
+    const reader: FileReader = new FileReader();
+
+    reader.onload = (e: any) => {
+      try {
+        const bstr: string = e.target.result;
+        const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+        const wsname: string = wb.SheetNames[0];
+        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        
+        // Map common Spanish/English headers
+        const dtos = data.map((row: any) => ({
+          name: row['Nombre'] || row['name'] || '',
+          barcode: row['Código de Barras'] || row['barcode']?.toString() || row['Codigo']?.toString() || '',
+          priceCents: Math.round(Number(row['Precio'] || row['price'] || 0) * 100),
+          costCents: Math.round(Number(row['Costo'] || row['cost'] || 0) * 100),
+          minStock: Number(row['Stock Mínimo'] || row['minStock'] || 5)
+        })).filter(p => p.name && p.barcode);
+
+        if (dtos.length === 0) {
+          this.ui.showToast('El archivo no tiene el formato correcto o está vacío.', 'error');
+          this.loading.set(false);
+          event.target.value = null;
+          return;
+        }
+
+        this.api.post('/products/bulk', dtos).subscribe({
+          next: (res: any) => {
+            this.ui.showToast(`Se importaron ${res.imported} productos correctamente.`);
+            this.loadProducts(this.searchTerm);
+            event.target.value = null;
+          },
+          error: (err) => {
+            console.error(err);
+            this.ui.showToast('Error al importar el archivo Excel.', 'error');
+            this.loading.set(false);
+            event.target.value = null;
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        this.ui.showToast('Error al leer el archivo Excel.', 'error');
+        this.loading.set(false);
+        event.target.value = null;
+      }
+    };
+    reader.readAsBinaryString(target.files[0]);
   }
 }

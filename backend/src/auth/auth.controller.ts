@@ -4,6 +4,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } fro
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
 import { TokenResponseDto } from './dto/token.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -30,6 +31,15 @@ export class AuthController {
         expires_in: `${number}ms` | `${number}s` | `${number}m` | `${number}h` | `${number}d` | `${number}w` | `${number}y`
     }> {
         return this.auth.signup(dto);
+    }
+
+    @Post('register-business')
+    @Throttle({ default: { limit: 5, ttl: 3_600_000 } }) // 5 registros por hora por IP
+    @ApiOperation({ summary: 'Registrar un negocio completo (School + Owner + Kiosk + Admin)' })
+    @ApiOkResponse({ description: 'JWT + datos del negocio creado (schoolId, ownerId, kioskId, kioskApiKey)' })
+    @ApiBadRequestResponse({ description: 'Datos inválidos o email existente' })
+    async registerBusiness(@Body() dto: RegisterBusinessDto) {
+        return this.auth.registerBusiness(dto);
     }
 
     @Post('login')

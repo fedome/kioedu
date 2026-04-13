@@ -58,31 +58,12 @@
           </button>
           <button
             class="relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all"
-            [ngClass]="method === 'ACCOUNT' ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 hover:border-indigo-300 text-slate-500 bg-white'"
-            [disabled]="!childName || !isScanned" [class.opacity-50]="!childName || !isScanned" [class.cursor-not-allowed]="!childName || !isScanned"
-            [title]="!childName ? 'Selecciona un alumno primero' : (!isScanned ? 'Debe utilizar la tarjeta física' : '')" (click)="onMethodChange('ACCOUNT')">
-            <span
-              class="absolute top-2 right-2 px-1.5 py-0.5 bg-slate-100 text-[10px] font-black text-slate-400 border border-slate-200 rounded">F3</span>
-            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span class="text-sm font-bold block text-center">
-              Fiado / Cuenta
-              <span *ngIf="!childName" class="block text-[8px] mt-1 font-semibold uppercase text-red-500">Requiere
-                alumno</span>
-              <span *ngIf="childName && !isScanned" class="block text-[8px] mt-1 font-semibold uppercase text-orange-500">Requiere
-                Tarjeta Física</span>
-            </span>
-          </button>
-          <button
-            class="relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all"
             [ngClass]="method === 'MERCADOPAGO' ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-200 hover:border-indigo-300 text-slate-500 bg-white'"
             [disabled]="!ui.isOnline()" [class.opacity-50]="!ui.isOnline()" [class.cursor-not-allowed]="!ui.isOnline()"
             [title]="!ui.isOnline() ? 'Requiere conexión a internet' : ''"
             (click)="ui.isOnline() && onMethodChange('MERCADOPAGO')">
             <span
-              class="absolute top-2 right-2 px-1.5 py-0.5 bg-slate-100 text-[10px] font-black text-slate-400 border border-slate-200 rounded">F4</span>
+              class="absolute top-2 right-2 px-1.5 py-0.5 bg-slate-100 text-[10px] font-black text-slate-400 border border-slate-200 rounded">F3</span>
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />

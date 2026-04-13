@@ -46,12 +46,6 @@ export class UpdateInvoicingConfigDto {
     @IsString()
     keyContent?: string | null;
 
-    @ApiPropertyOptional({ description: 'AfipSDK access token (de afipsdk.com)' })
-    @IsOptional()
-    @ValidateIf((o) => o.accessToken !== null)
-    @IsString()
-    accessToken?: string | null;
-
     @ApiPropertyOptional()
     @IsOptional()
     @IsBoolean()

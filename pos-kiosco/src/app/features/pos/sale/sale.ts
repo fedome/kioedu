@@ -57,7 +57,6 @@ interface Student {
 })
 export class SaleComponent implements OnInit {
   @ViewChild('searchInput') searchInput!: ElementRef;
-  @ViewChild('studentInput') studentInput!: ElementRef; // <--- Referencia al input de alumno
 
   private ui = inject(UiService);
   private api = inject(ApiService);
@@ -88,9 +87,7 @@ export class SaleComponent implements OnInit {
   qrCodeUrl: string | undefined = undefined;
 
   // --- ESTADO DEL ALUMNO ---
-  studentSearchTerm: string = '';
   selectedStudent: Student | null = null;
-  searchingStudent = false;
 
   // --- FILTRO DE CATEGORÍA ---
   selectedCategory: string | null = null;
@@ -343,59 +340,62 @@ export class SaleComponent implements OnInit {
   resetCart() {
     this.cart = [];
     this.selectedStudent = null;
-    this.studentSearchTerm = '';
     this.isStudentScanned = false;
   }
 
-  // --- LÓGICA DE ALUMNOS (NUEVO) ---
+  // --- LÓGICA DE ALUMNOS (SOLO POR TARJETA RFID) ---
 
-  searchResults: Student[] = [];
   isStudentScanned = false;
-  private studentScanBufferTime = 0;
-  private studentScanStrokeCount = 0;
 
-  onStudentInputKeydown(event: KeyboardEvent) {
+  // Global RFID scan buffer: USB RFID readers type chars very fast (<50ms between keystrokes) and end with Enter
+  private rfidBuffer = '';
+  private rfidLastKeystroke = 0;
+
+  @HostListener('document:keypress', ['$event'])
+  handleRfidScan(event: KeyboardEvent) {
+    const now = Date.now();
+
+    // If more than 100ms between keystrokes, reset buffer (it's a human typing)
+    if (now - this.rfidLastKeystroke > 100) {
+      this.rfidBuffer = '';
+    }
+    this.rfidLastKeystroke = now;
+
     if (event.key === 'Enter') {
-      const isFastEnough = (Date.now() - this.studentScanBufferTime) < 200;
-      if (this.studentSearchTerm?.length >= 4 && isFastEnough && this.studentScanStrokeCount >= 4) {
-         this.isStudentScanned = true;
-      } else {
-         this.isStudentScanned = false; // it was manually typed or pasted
+      // If we have 4+ chars typed in quick succession, it's an RFID scan
+      if (this.rfidBuffer.length >= 4) {
+        event.preventDefault();
+        event.stopPropagation();
+        // Clear the product search input in case chars leaked into it
+        this.searchTerm = '';
+        this.onRfidScan(this.rfidBuffer);
       }
-      this.searchStudent();
+      this.rfidBuffer = '';
     } else {
-      if (this.studentScanStrokeCount === 0 || (Date.now() - this.studentScanBufferTime) > 300) {
-         this.studentScanBufferTime = Date.now();
-         this.studentScanStrokeCount = 1;
-      } else {
-         this.studentScanStrokeCount++;
-      }
+      this.rfidBuffer += event.key;
     }
   }
 
-  searchStudent() {
-    if (!this.studentSearchTerm.trim()) return;
-
-    this.searchingStudent = true;
-    this.searchResults = [];
-    this.studentsService.search(this.studentSearchTerm)
+  /**
+   * Llamado por el sistema de escaneo RFID cuando se detecta una tarjeta.
+   * Busca al alumno por el UID de la tarjeta y lo selecciona automáticamente.
+   */
+  onRfidScan(cardUid: string) {
+    this.isStudentScanned = true;
+    this.studentsService.search(cardUid)
       .then((results: Student[]) => {
-        this.searchingStudent = false;
-        if (results.length === 1) {
+        if (results.length >= 1) {
           this.selectStudent(results[0]);
-        } else if (results.length > 1) {
-          // Guardar resultados para mostrar en el desplegable
-          this.searchResults = results;
         } else {
-          this.notifications.warning('No encontrado', 'Alumno no encontrado');
-          this.studentInput?.nativeElement?.select();
+          this.notifications.warning('No encontrado', 'Tarjeta no registrada en el sistema');
+          this.isStudentScanned = false;
         }
-        this.studentSearchTerm = '';
+        this.cdr.detectChanges();
       })
       .catch(err => {
         console.error(err);
-        this.searchingStudent = false;
-        this.notifications.error('Error', 'Error buscando alumno');
+        this.notifications.error('Error', 'Error buscando alumno por tarjeta');
+        this.isStudentScanned = false;
       });
   }
 
@@ -405,8 +405,6 @@ export class SaleComponent implements OnInit {
       return;
     }
     this.selectedStudent = s;
-    this.searchResults = [];
-    // Volver el foco al buscador de productos para seguir vendiendo rápido
     this.focusSearch();
   }
 
@@ -421,11 +419,11 @@ export class SaleComponent implements OnInit {
     this.showPaymentModal = true;
   }
 
-  onPaymentConfirmed(data: { method: 'CASH' | 'CARD' | 'ACCOUNT' | 'MERCADOPAGO', invoicing?: any }) {
+  onPaymentConfirmed(data: { method: 'CASH' | 'CARD' | 'MERCADOPAGO', invoicing?: any }) {
     const { method, invoicing } = data;
-    // 1. Validación de Saldo (Solo si paga con SALDO PRECARGADO - CARD)
-    if ((method === 'CARD' || method === 'ACCOUNT') && !this.selectedStudent) {
-      this.notifications.error('Error', `Debe seleccionar un alumno para pagar con ${method === 'CARD' ? 'saldo' : 'fiado'}`);
+    // Validación: pago con tarjeta requiere alumno escaneado
+    if (method === 'CARD' && !this.selectedStudent) {
+      this.notifications.error('Error', 'Debe escanear la tarjeta RFID del alumno para pagar con saldo');
       this.showPaymentModal = false;
       return;
     }
@@ -453,7 +451,7 @@ export class SaleComponent implements OnInit {
         unitPriceCents: item.product.priceCents
       })),
       totalCents: Math.round(this.total * 100),
-      childId: (method === 'CARD' || method === 'ACCOUNT') ? this.selectedStudent?.id : null,
+      childId: method === 'CARD' ? this.selectedStudent?.id : null,
       paymentMethod: method,
       idempotencyKey,
       shouldInvoice: invoicing?.shouldInvoice,

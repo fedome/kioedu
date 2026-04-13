@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException, NotFoundException
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { Prisma } from '@prisma/client';
@@ -9,6 +10,7 @@ import { Role } from './roles.enum';
 import { JWT_EXPIRES_IN } from "./constants";
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +38,90 @@ export class AuthService {
             }
             throw e;
         }
+    }
+
+    /**
+     * Registra un negocio completo: School + Owner + Kiosk + User ADMIN + roles base.
+     * Endpoint público para onboarding de dueños de kioscos.
+     */
+    async registerBusiness(dto: RegisterBusinessDto) {
+        const normalizedEmail = dto.email.trim().toLowerCase();
+
+        // Verificar si el email ya existe
+        const exists = await this.users.findByEmail(normalizedEmail);
+        if (exists) throw new ConflictException('Este email ya está registrado.');
+
+        const hash = await bcrypt.hash(dto.password, 12);
+        const apiKey = `kiosk_${randomUUID().replace(/-/g, '')}`;
+
+        const result = await this.prisma.$transaction(async (tx) => {
+            // 1. Crear la escuela
+            const school = await tx.school.create({
+                data: { name: dto.schoolName },
+            });
+
+            // 2. Crear el owner (dueño del negocio)
+            const owner = await tx.owner.create({
+                data: { name: dto.ownerName, schoolId: school.id },
+            });
+
+            // 3. Crear el kiosco con API key auto-generada
+            const kiosk = await tx.kiosk.create({
+                data: {
+                    name: dto.kioskName || 'Kiosco Principal',
+                    schoolId: school.id,
+                    ownerId: owner.id,
+                    apiKey,
+                    subscriptionActive: true,
+                },
+            });
+
+            // 4. Crear roles base para la escuela
+            const rolesData = [
+                { name: 'ADMIN', description: 'Acceso total', schoolId: school.id, isPosRole: true },
+                { name: 'CASHIER', description: 'Cajero POS', schoolId: school.id, isPosRole: true },
+                { name: 'ENCARGADO', description: 'Gestión stock/reportes', schoolId: school.id, isPosRole: true },
+            ];
+
+            const createdRoles: Record<string, any> = {};
+            for (const r of rolesData) {
+                // Buscar si el rol ya existe (roles son globales por name unique)
+                let role = await tx.role.findUnique({ where: { name: r.name } });
+                if (!role) {
+                    role = await tx.role.create({ data: r });
+                }
+                createdRoles[r.name] = role;
+            }
+
+            // 5. Crear el usuario admin del negocio
+            const user = await tx.user.create({
+                data: {
+                    name: dto.ownerName,
+                    email: normalizedEmail,
+                    password: hash,
+                    isActive: true,
+                    schoolId: school.id,
+                    roles: {
+                        create: [{ roleId: createdRoles['ADMIN'].id }],
+                    },
+                },
+                include: { roles: { include: { role: true } } },
+            });
+
+            return { user, school, owner, kiosk };
+        });
+
+        // Generar JWT para auto-login
+        const roles = result.user.roles.map((ur: any) => ur.role.name);
+        const tokenData = await this.signToken(result.user.id, normalizedEmail, roles);
+
+        return {
+            ...tokenData,
+            schoolId: result.school.id,
+            ownerId: result.owner.id,
+            kioskId: result.kiosk.id,
+            kioskApiKey: apiKey,
+        };
     }
 
     async login(dto: LoginDto) {
@@ -126,8 +212,8 @@ export class AuthService {
 
         return {
             message: genericMessage,
-            // ⚠️ SOLO PARA DESARROLLO — Quitar en producción
-            _dev_reset_token: resetToken,
+            // ⚠️ SOLO PARA DESARROLLO — Removido en producción por seguridad
+            // _dev_reset_token: resetToken, 
         };
     }
 

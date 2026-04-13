@@ -85,6 +85,7 @@ model School {
   name            String
   address         String?
   inviteCode      String?          @unique
+  isActive        Boolean          @default(true)
   createdAt       DateTime         @default(now())
   children        Child[]
   invoicingConfig InvoicingConfig?

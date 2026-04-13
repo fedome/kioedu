@@ -8,7 +8,8 @@ import { InvoicingService } from '../../../core/services/invoicing.service';
 import { CashierAuthService } from '../../../core/auth/cashier-auth.service';
 import { UiService } from '../../../core/services/ui.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
-import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // Local types to avoid Prisma dependency in frontend
 type TransactionType = 'SALE' | 'CREDIT';
@@ -129,23 +130,37 @@ export class TransactionsHistoryComponent implements OnInit {
     return this.filteredTransactions.length;
   }
 
-  exportToExcel() {
-    const data = this.filteredTransactions.map(t => ({
-      'ID': t.id,
-      'Fecha': new Date(t.startedAt).toLocaleDateString('es-AR'),
-      'Hora': new Date(t.startedAt).toLocaleTimeString('es-AR'),
-      'Tipo': t.type === 'SALE' ? 'VENTA' : 'CARGA',
-      'Origen': t.isOffline ? 'OFFLINE' : 'ONLINE',
-      'Método Pago': t.paymentMethod,
-      'Total': (t.totalCents / 100),
-      'Estado': t.status,
-      'Factura #': t.invoiceNumber || '',
-      'CAE': t.invoiceCae || ''
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Historial");
-    XLSX.writeFile(wb, `Historial_${new Date().toISOString().split('T')[0]}.xlsx`);
+  exportToPDF() {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(18);
+    doc.text('Historial de Transacciones - KioEdu', 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Período: ${this.getRangeLabel()}`, 14, 28);
+    doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, 14, 34);
+
+    const dataRows = this.filteredTransactions.map(t => [
+      `#${t.id}`,
+      new Date(t.startedAt).toLocaleDateString('es-AR') + ' ' + new Date(t.startedAt).toLocaleTimeString('es-AR').substring(0, 5),
+      t.type === 'SALE' ? 'VENTA' : 'CARGA',
+      t.paymentMethod,
+      `$ ${(t.totalCents / 100).toLocaleString('es-AR')}`,
+      t.status,
+      t.invoiceCae ? `FACT #${t.invoiceNumber}` : '-'
+    ]);
+
+    autoTable(doc, {
+      startY: 44,
+      head: [['Ticket', 'Fecha/Hora', 'Tipo', 'Pago', 'Total', 'Estado', 'Comprobante']],
+      body: dataRows,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] }, // Indigo 500
+    });
+
+    doc.save(`Historial_${new Date().toISOString().split('T')[0]}.pdf`);
   }
 
   reprint(tx: any) {

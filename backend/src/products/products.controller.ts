@@ -36,15 +36,15 @@ export class ProductsController {
   @UseGuards(CashierJwtGuard, RolesGuard)
   @Roles(Role.CASHIER, Role.ADMIN, Role.ENCARGADO)
   @ApiOperation({ summary: 'V2: Buscar producto por código de barras (Escáner)' })
-  findByBarcode(@Query('barcode') barcode: string) {
-    return this.productsService.findByBarcode(barcode);
+  findByBarcode(@Query('barcode') barcode: string, @Req() req: any) {
+    return this.productsService.findByBarcode(barcode, req.user.ownerId);
   }
 
   @Get('dashboard-metrics')
   @UseGuards(CashierJwtGuard)
   @ApiOperation({ summary: 'Métricas para el Home (Stock bajo y Vencimientos)' })
-  getDashboardMetrics() {
-    return this.productsService.getDashboardMetrics();
+  getDashboardMetrics(@Req() req: any) {
+    return this.productsService.getDashboardMetrics(req.user.ownerId);
   }
 
   @Get()
@@ -52,40 +52,49 @@ export class ProductsController {
   @Roles(Role.ADMIN, Role.CASHIER, Role.ENCARGADO)
   @ApiOperation({ summary: 'Listar productos (soporta ?search y ?lowStock=true)' })
   findAll(
-    @Query('search') search?: string,
-    @Query('lowStock') lowStock?: string,
-    @Query('lastSync') lastSync?: string,
+    @Query('search') search: string | undefined,
+    @Query('lowStock') lowStock: string | undefined,
+    @Query('lastSync') lastSync: string | undefined,
+    @Req() req: any
   ) {
-    return this.productsService.findAll(search, lowStock === 'true', lastSync);
+    return this.productsService.findAll(search, lowStock === 'true', lastSync, req.user.ownerId);
   }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ENCARGADO, Role.CASHIER)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  create(@Body() createProductDto: CreateProductDto, @Req() req: any) {
+    return this.productsService.create(createProductDto, req.user.ownerId);
+  }
+
+  @Post('bulk')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.ENCARGADO)
+  @ApiOperation({ summary: 'Importar productos masivamente desde Excel' })
+  bulkCreate(@Body() productsDto: CreateProductDto[], @Req() req: any) {
+    return this.productsService.bulkCreate(productsDto, req.user.ownerId);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.CASHIER, Role.ENCARGADO)
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.productsService.findOne(id, req.user.ownerId);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.ENCARGADO, Role.CASHIER)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto, @Req() req) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto, @Req() req: any) {
     const userId = req.user?.id;
-    return this.productsService.update(id, updateProductDto, userId);
+    return this.productsService.update(id, updateProductDto, req.user.ownerId, userId);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.CASHIER, Role.ENCARGADO)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.productsService.remove(id, req.user.ownerId);
   }
 
   @Post(':id/stock')
@@ -93,11 +102,11 @@ export class ProductsController {
   async addStock(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AddStockDto,
-    @Req() req,
+    @Req() req: any,
   ) {
     const userId = req.user.id;
     const expiration = dto.expirationDate ? new Date(dto.expirationDate) : undefined;
-    return this.productsService.addStock(id, dto, userId, expiration);
+    return this.productsService.addStock(id, dto, userId, req.user.ownerId, expiration);
   }
 
   @Post(':id/reconcile')
@@ -108,9 +117,9 @@ export class ProductsController {
     @Param('id', ParseIntPipe) id: number,
     @Body('physicalStock', ParseIntPipe) physicalStock: number,
     @Body('reason') reason: string,
-    @Req() req,
+    @Req() req: any,
   ) {
     const userId = req.user.id;
-    return this.productsService.reconcile(id, physicalStock, reason, userId);
+    return this.productsService.reconcile(id, physicalStock, reason, req.user.ownerId, userId);
   }
 }

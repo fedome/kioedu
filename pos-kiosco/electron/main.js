@@ -8,57 +8,48 @@ let mainWindow = null;
 // ==================== CONFIGURACIÓN ====================
 
 /**
- * Lee defaults.json (viene con la app) y lo mergea con kiosk.json (usuario).
- * kiosk.json sobreescribe lo que tenga; si no existe, usa solo defaults.
+ * Lee kiosk.json — la única fuente de verdad.
+ * - En desarrollo: lee de src/assets/kiosk.json (raíz del proyecto)
+ * - En producción: lee de resources/kiosk.json (empaquetado con la app)
  */
 function readKioskConfig() {
-  // 1. Leer defaults que vienen con la app
-  const defaultsPath = path.join(__dirname, 'defaults.json');
-  let defaults = {};
+  const isDev = !app.isPackaged;
+
+  // En dev, subimos desde /electron al root del proyecto, luego src/assets
+  const configPath = isDev
+    ? path.join(__dirname, '..', 'src', 'assets', 'kiosk.json')
+    : path.join(process.resourcesPath, 'kiosk.json');
+
+  let cfg = {};
   try {
-    defaults = JSON.parse(fs.readFileSync(defaultsPath, 'utf-8'));
+    let raw = fs.readFileSync(configPath, 'utf-8');
+    raw = raw.replace(/^\uFEFF/, ''); // eliminar BOM
+    cfg = JSON.parse(raw);
   } catch (e) {
-    console.warn('[CONFIG] No se encontró defaults.json, usando valores hardcoded.');
-    defaults = {
+    console.error('[CONFIG] No se pudo leer kiosk.json en:', configPath, e.message);
+    // Fallback mínimo
+    cfg = {
       apiBaseUrl: 'http://localhost:3000/api/v1',
-      kioskApiKey: 'KIOSK_DEMO_KEY_123',
+      kioskApiKey: '',
       kioskId: 1,
     };
   }
 
-  // 2. Intentar leer kiosk.json del usuario (AppData)
-  const userConfigPath = path.join(app.getPath('userData'), 'kiosk.json');
-  let userConfig = {};
-  if (fs.existsSync(userConfigPath)) {
-    try {
-      let raw = fs.readFileSync(userConfigPath, 'utf-8');
-      raw = raw.replace(/^\uFEFF/, ''); // eliminar BOM
-      userConfig = JSON.parse(raw);
-    } catch (e) {
-      console.warn('[CONFIG] Error al leer kiosk.json, se usarán los defaults:', e.message);
-    }
-  } else {
-    console.log('[CONFIG] No existe kiosk.json en:', userConfigPath);
-    console.log('[CONFIG] Usando configuración por defecto. Creando kiosk.json...');
-    // Crear un kiosk.json con los defaults para que el usuario sepa dónde configurarlo
-    try {
-      fs.writeFileSync(userConfigPath, JSON.stringify(defaults, null, 2), 'utf-8');
-    } catch { }
-  }
-
-  // 3. Mergear: kiosk.json sobreescribe los defaults
-  const cfg = { ...defaults, ...userConfig };
-
   if (!cfg.apiBaseUrl || !cfg.kioskApiKey) {
-    throw new Error('Configuración inválida: faltan apiBaseUrl o kioskApiKey');
+    console.error('[CONFIG] ⚠️ Configuración incompleta — falta apiBaseUrl o kioskApiKey');
+    console.error('[CONFIG] Ruta del archivo:', configPath);
   }
 
+  console.log('[CONFIG] Fuente:', configPath);
   console.log('[CONFIG] Final:', JSON.stringify({ apiBaseUrl: cfg.apiBaseUrl, kioskId: cfg.kioskId }));
   return cfg;
 }
 
 function getKioskConfigPath() {
-  return path.join(app.getPath('userData'), 'kiosk.json');
+  const isDev = !app.isPackaged;
+  return isDev
+    ? path.join(__dirname, '..', 'src', 'assets', 'kiosk.json')
+    : path.join(process.resourcesPath, 'kiosk.json');
 }
 
 // ==================== KIOSK LOGIN ====================

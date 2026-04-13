@@ -136,6 +136,21 @@ export class PrintingService {
             </div>
           </div>
           <div class="line"></div>
+
+          ${transaction.invoiceCae ? `
+          <div class="center total-section">
+            <div class="bold">${transaction.invoiceType === 6 ? 'Factura B' : transaction.invoiceType === 11 ? 'Factura C' : transaction.invoiceType === 1 ? 'Factura A' : 'Ticket Factura'}</div>
+            <div>CAE: ${transaction.invoiceCae}</div>
+            <div>Vto CAE: ${transaction.invoiceCaeExpiry ? new Date(transaction.invoiceCaeExpiry).toLocaleDateString('es-AR') : '-'}</div>
+          </div>
+          <div class="line"></div>
+          ` : `
+          <div class="center total-section">
+            <div>DOCUMENTO NO VALIDO COMO FACTURA</div>
+          </div>
+          <div class="line"></div>
+          `}
+
           <div class="footer center">
             <div>¡Gracias!</div>
           </div>

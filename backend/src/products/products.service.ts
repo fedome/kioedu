@@ -11,7 +11,7 @@ export class ProductsService {
   /**
    * Crear producto (Inicia con stock 0, el stock se agrega por Lotes después)
    */
-  async create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto, ownerId: number) {
     const { minStock, ...rest } = dto;
 
     try {
@@ -33,7 +33,7 @@ export class ProductsService {
 
       return await this.prisma.product.create({
         data: {
-          ownerId: 1, // TODO: Debería venir del contexto del usuario/kiosco
+          ownerId: ownerId, // Asignado dinámicamente según el req.user
           ...rest,
           imageUrl: finalImageUrl,
           stockQuantity: 0,
@@ -51,8 +51,29 @@ export class ProductsService {
     }
   }
 
-  async findAll(query: string = '', lowStock: boolean = false, lastSync?: string) {
-    const where: any = {};
+  async bulkCreate(dtos: CreateProductDto[], ownerId: number) {
+    const toInsert = dtos.map(dto => ({
+      name: String(dto.name || '').trim(),
+      barcode: String(dto.barcode || '').trim(),
+      categoryId: dto.categoryId ? Number(dto.categoryId) : 1, // Fallback to category 1 if missing
+      priceCents: Number(dto.priceCents || 0),
+      costCents: Number(dto.costCents || 0),
+      supplierId: dto.supplierId,
+      minStockLevel: dto.minStock ?? 5,
+      stockQuantity: 0,
+      ownerId: ownerId, // Asignado según el Kiosco
+    })).filter(dto => dto.name.length > 0 && dto.barcode.length > 0);
+
+    const result = await this.prisma.product.createMany({
+      data: toInsert,
+      skipDuplicates: true
+    });
+
+    return { imported: result.count, total: dtos.length };
+  }
+
+  async findAll(query: string = '', lowStock: boolean = false, lastSync: string | undefined, ownerId: number) {
+    const where: any = { ownerId };
 
     // 1. Filtro Texto
     if (query) {
@@ -94,30 +115,30 @@ export class ProductsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, ownerId: number) {
     const product = await this.prisma.product.findFirst({
-      where: { id },
+      where: { id, ownerId },
       include: { categoryRel: true }
     });
     if (!product) throw new NotFoundException(`Producto ${id} no encontrado.`);
     return product;
   }
 
-  async findByBarcode(barcode: string) {
+  async findByBarcode(barcode: string, ownerId: number) {
     const product = await this.prisma.product.findFirst({
-      where: { barcode, isActive: true },
+      where: { barcode, isActive: true, ownerId },
       include: { categoryRel: true }
     });
     if (!product) throw new NotFoundException(`Producto ${barcode} no encontrado.`);
     return product;
   }
 
-  async update(id: number, dto: UpdateProductDto, userId?: number) {
+  async update(id: number, dto: UpdateProductDto, ownerId: number, userId?: number) {
     const { stockQuantity, minStock, ...cleanDto } = dto as any;
 
     return this.prisma.$transaction(async (tx) => {
       const current = await tx.product.findFirst({
-        where: { id },
+        where: { id, ownerId },
         select: { priceCents: true, costCents: true, name: true, imageUrl: true }
       });
 
@@ -165,7 +186,10 @@ export class ProductsService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, ownerId: number) {
+    const current = await this.prisma.product.findFirst({ where: { id, ownerId } });
+    if (!current) throw new NotFoundException(`Producto ${id} no encontrado.`);
+
     return this.prisma.product.update({
       where: { id },
       data: { isActive: false }
@@ -178,8 +202,12 @@ export class ProductsService {
     productId: number,
     dto: AddStockDto,
     userId: number,
+    ownerId: number,
     expirationDate?: Date
   ) {
+    const current = await this.prisma.product.findFirst({ where: { id: productId, ownerId } });
+    if (!current) throw new NotFoundException('Producto no encontrado');
+
     return this.prisma.$transaction(async (tx) => {
 
       // 1. Crear el Lote con TODOS los datos
@@ -221,9 +249,9 @@ export class ProductsService {
     });
   }
 
-  async reconcile(productId: number, physicalStock: number, reason: string, userId: number) {
+  async reconcile(productId: number, physicalStock: number, reason: string, ownerId: number, userId: number) {
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.findFirst({ where: { id: productId } });
+      const product = await tx.product.findFirst({ where: { id: productId, ownerId } });
       if (!product) throw new NotFoundException('Producto no encontrado');
 
       const diff = physicalStock - product.stockQuantity;
@@ -250,7 +278,7 @@ export class ProductsService {
     });
   }
 
-  async getDashboardMetrics() {
+  async getDashboardMetrics(ownerId: number) {
     const today = new Date();
     const limitDate = new Date();
     limitDate.setDate(today.getDate() + 30);
@@ -259,6 +287,7 @@ export class ProductsService {
       this.prisma.product.count({
         where: {
           isActive: true,
+          ownerId: ownerId,
           stockQuantity: { lte: 5 }
         }
       }),
@@ -268,7 +297,8 @@ export class ProductsService {
             gte: today,
             lte: limitDate
           },
-          quantity: { gt: 0 }
+          quantity: { gt: 0 },
+          product: { ownerId: ownerId }
         },
         include: {
           product: { select: { name: true } }

@@ -40,9 +40,9 @@
                 </div>
             </div>
 
-            <button (click)="exportToExcel()"
-                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group">
-                <span>Exportar</span>
+            <button (click)="exportToPDF()"
+                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group">
+                <span>Descargar PDF</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-y-0.5 transition-transform"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -456,6 +456,7 @@
                     d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
         </div>
+
         <h3 class="text-lg font-bold text-slate-800">Sin datos disponibles</h3>
         <p class="text-slate-400 mt-1 max-w-sm text-center">Intenta ajustar el filtro de fechas.</p>
     </div>

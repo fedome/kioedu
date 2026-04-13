@@ -31,7 +31,6 @@ export class ProductFormModalComponent implements OnInit {
   // Categorías
   categories: Category[] = [];
   showCategoryManager = false;
-  showUrlInput = false; // Toggle para URL manual
 
   // Proveedores
   suppliers: Supplier[] = [];
@@ -45,45 +44,6 @@ export class ProductFormModalComponent implements OnInit {
     minStock: 5,
     imageUrl: ''
   };
-
-  generatingImage = false; // Estado para la generación de imagen
-
-  async generateAIImage() {
-    const productName = this.formData.name?.trim();
-    if (!productName) {
-      this.notifications.warning('Atención', 'Primero escribe el nombre del producto.');
-      return;
-    }
-
-    this.generatingImage = true;
-
-    try {
-      let finalPrompt = productName + ", detailed product photography, white background, high quality, 4k";
-
-      // Call backend AI to enhance the prompt
-      try {
-        const res: any = await firstValueFrom(this.api.post('/ai/enhance-prompt', { productName }));
-        if (res?.prompt) {
-          finalPrompt = res.prompt;
-        }
-      } catch (e) {
-        console.warn('AI prompt enhancement unavailable, using fallback.', e);
-      }
-
-      const encodedName = encodeURIComponent(finalPrompt);
-      const seed = Math.floor(Math.random() * 1000000);
-      const url = `https://image.pollinations.ai/prompt/${encodedName}?width=400&height=400&nologo=true&seed=${seed}`;
-
-      this.formData.imageUrl = url;
-      this.cdr.markForCheck(); // Forzar actualización de vista
-    } catch (err) {
-      console.error(err);
-      this.notifications.error('Error', 'Hubo un error al generar la imagen.');
-    } finally {
-      this.generatingImage = false;
-      this.cdr.markForCheck(); // Para el estado loading
-    }
-  }
 
   // Variables para la Calculadora
   priceInput: number | null = null;

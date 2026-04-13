@@ -27,9 +27,9 @@ export class PaymentModalComponent {
   @Input() qrCodeUrl?: string;
 
   @Output() cancel = new EventEmitter<void>();
-  @Output() pay = new EventEmitter<{ method: 'CASH' | 'CARD' | 'ACCOUNT' | 'MERCADOPAGO', invoicing?: InvoicingData }>();
+  @Output() pay = new EventEmitter<{ method: 'CASH' | 'CARD' | 'MERCADOPAGO', invoicing?: InvoicingData }>();
 
-  method: 'CASH' | 'CARD' | 'ACCOUNT' | 'MERCADOPAGO' = 'CASH';
+  method: 'CASH' | 'CARD' | 'MERCADOPAGO' = 'CASH';
   amountPaid: number | null = null;
   loadingMP = false;
 
@@ -46,12 +46,12 @@ export class PaymentModalComponent {
   ];
 
   get vuelto(): number {
-    if (this.method === 'ACCOUNT' || this.method === 'MERCADOPAGO') return 0;
+    if (this.method === 'MERCADOPAGO') return 0;
     if (!this.amountPaid) return -this.total;
     return this.amountPaid - this.total;
   }
 
-  onMethodChange(newMethod: 'CASH' | 'CARD' | 'ACCOUNT' | 'MERCADOPAGO') {
+  onMethodChange(newMethod: 'CASH' | 'CARD' | 'MERCADOPAGO') {
     this.method = newMethod;
     if (newMethod === 'CASH') {
       setTimeout(() => {
@@ -111,10 +111,6 @@ export class PaymentModalComponent {
           if (this.childName) this.onMethodChange('CARD');
           break;
         case 'F3':
-          event.preventDefault();
-          if (this.childName) this.onMethodChange('ACCOUNT');
-          break;
-        case 'F4':
           event.preventDefault();
           if (this.ui.isOnline()) this.onMethodChange('MERCADOPAGO');
           break;
