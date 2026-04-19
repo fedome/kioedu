@@ -16,6 +16,7 @@ import { AuditFeedComponent } from './features/audit/audit';
 export const routes: Routes = [
   // Login afuera del shell
   { path: 'login', component: LoginComponent },
+  { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
 
   // App adentro del shell
   {

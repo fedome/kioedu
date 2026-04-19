@@ -19,7 +19,6 @@ import {
   IonLabel,
   IonToggle,
   IonInput,
-  IonText,
 } from '@ionic/angular/standalone';
 
 import {
@@ -71,7 +70,6 @@ import { ThemeService } from 'src/app/services/theme/theme';
     IonLabel,
     IonToggle,
     IonInput,
-    IonText,
     NotificationsBellComponent,
 
   ],

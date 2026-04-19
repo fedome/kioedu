@@ -1,12 +1,15 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService, AppSettings } from '../../core/services/settings.service';
 import { UiService } from '../../core/services/ui.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { InvoicingService, InvoicingConfig, ArcaStatus } from '../../core/services/invoicing.service';
 import { CashierAuthService } from '../../core/auth/cashier-auth.service';
 import { ThermalPrinterService } from '../../core/services/thermal-printer.service';
+import { firstValueFrom } from 'rxjs';
+import { ApiService } from '../../core/api/api.service';
 
 interface PrinterInfo {
     name: string;
@@ -28,6 +31,9 @@ export class SettingsComponent implements OnInit {
     private invoicingService = inject(InvoicingService);
     public auth = inject(CashierAuthService);
     private thermalPrinterService = inject(ThermalPrinterService);
+    private api = inject(ApiService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
 
     thermalPrinterConnected = signal(this.thermalPrinterService.isConnected);
 
@@ -43,10 +49,13 @@ export class SettingsComponent implements OnInit {
     saved = signal(false);
     showAdvancedSmtp = false;
     showAdvancedPaths = false;
-    activeTab = signal<'profile' | 'system' | 'arca'>('profile');
+    activeTab = signal<'profile' | 'system' | 'arca' | 'payments'>('profile');
 
-    setActiveTab(tab: 'profile' | 'system' | 'arca') {
+    setActiveTab(tab: 'profile' | 'system' | 'arca' | 'payments') {
         this.activeTab.set(tab);
+        if (tab === 'payments') {
+            this.loadMpConfig();
+        }
     }
 
     // Facturación ARCA
@@ -69,6 +78,12 @@ export class SettingsComponent implements OnInit {
         this.ui.setPageTitle('Configuración', 'Ajustes del sistema');
         this.loadPrinters();
         this.loadInvoicingConfig();
+
+        // Verificar si venimos de la redirección de Mercado Pago
+        const code = this.route.snapshot.queryParamMap.get('code');
+        if (code) {
+            this.handleMpCallback(code);
+        }
     }
 
     async loadPrinters() {
@@ -173,5 +188,79 @@ export class SettingsComponent implements OnInit {
 
     updateInvoicingField(field: string, value: any) {
         this.invoicingConfig.set({ ...this.invoicingConfig(), [field]: value });
+    }
+
+    // Mercado Pago Info
+    mpConfig = signal<{ isConfigured: boolean; publicKey?: string } | null>(null);
+    loadingMp = signal(false);
+
+    async loadMpConfig() {
+        this.loadingMp.set(true);
+        try {
+            const info = await firstValueFrom(this.api.get<{ isConfigured: boolean; publicKey?: string }>('/mercadopago/info'));
+            this.mpConfig.set(info);
+        } catch (error) {
+            console.error('Error loading MP info:', error);
+        } finally {
+            this.loadingMp.set(false);
+        }
+    }
+
+    async connectWithMp() {
+        this.loadingMp.set(true);
+        try {
+            const res = await firstValueFrom(this.api.get<{ url: string }>('/mercadopago/auth-url'));
+            if (res.url) {
+                // Abrir en popup para no perder el estado del POS
+                const width = 600;
+                const height = 700;
+                const left = (window.screen.width / 2) - (width / 2);
+                const top = (window.screen.height / 2) - (height / 2);
+                
+                const popup = window.open(
+                    res.url, 
+                    'MP_AUTH', 
+                    `width=${width},height=${height},left=${left},top=${top}`
+                );
+
+                // Monitorear si el popup se cierra o si recibimos el mensaje de éxito
+                const checkPopup = setInterval(() => {
+                    if (!popup || popup.closed) {
+                        clearInterval(checkPopup);
+                        this.loadingMp.set(false);
+                        this.loadMpConfig(); // Refrescar por si se completó
+                    }
+                }, 1000);
+            }
+        } catch (error) {
+            this.notifications.error('Error', 'No se pudo iniciar la conexión con Mercado Pago');
+            this.loadingMp.set(false);
+        }
+    }
+
+    private async handleMpCallback(code: string) {
+        this.activeTab.set('payments');
+        this.loadingMp.set(true);
+        this.notifications.info('DEBUG', `Código detectado: ${code.substring(0, 5)}...`);
+        this.notifications.info('Mercado Pago', 'Finalizando la vinculación...');
+
+        try {
+            await firstValueFrom(this.api.post('/mercadopago/authorize', { code }));
+            this.notifications.success('Mercado Pago', 'Cuenta vinculada correctamente');
+            
+            // Limpiar el query param de la URL
+            this.router.navigate([], {
+                queryParams: { code: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true
+            });
+
+            await this.loadMpConfig();
+        } catch (error) {
+            this.notifications.error('Error', 'No se pudo completar la vinculación con Mercado Pago');
+            console.error(error);
+        } finally {
+            this.loadingMp.set(false);
+        }
     }
 }

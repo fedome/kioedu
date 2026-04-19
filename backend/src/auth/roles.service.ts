@@ -8,7 +8,13 @@ export class RolesService {
 
     async findAllRoles(schoolId?: number, onlyPos: boolean = false) {
         const where: Prisma.RoleWhereInput = {};
-        if (schoolId) where.schoolId = schoolId;
+        // Include both school-specific roles AND global roles (schoolId = null)
+        if (schoolId) {
+            where.OR = [
+                { schoolId },
+                { schoolId: null }
+            ];
+        }
         if (onlyPos) where.isPosRole = true;
 
         return this.prisma.role.findMany({

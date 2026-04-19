@@ -38,6 +38,7 @@ import { ThemeService } from '../../services/theme/theme';
 import { NotificationsService } from '../../services/notification/notifications';
 import { SupportModalComponent } from 'src/app/components/support-modal/support-modal.component';
 import { NotificationsHistoryComponent } from "../../components/notifications-history/notifications-history.component";
+import { NotificationsBellComponent } from 'src/app/components/notifications-bell/notifications-bell.component';
 
 @Component({
   selector: 'app-settings',
@@ -62,6 +63,7 @@ import { NotificationsHistoryComponent } from "../../components/notifications-hi
     IonLabel,
     IonToggle,
     IonList,
+    NotificationsBellComponent,
   ],
 })
 export class SettingsPage implements OnInit {

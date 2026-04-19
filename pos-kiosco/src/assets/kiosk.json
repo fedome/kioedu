@@ -1,5 +1,5 @@
 {
-    "apiBaseUrl": "http://192.168.1.36:3000/api/v1",
+    "apiBaseUrl": "http://192.168.1.37:3000/api/v1",
     "kioskApiKey": "kiosk_1000135be7ae4453b8f2924a2030302b",
     "GEMINI_API_KEY": "AIzaSyB_fvTV5FFq6Bz8d__tE7eM6rQvOStgFH0"
 }

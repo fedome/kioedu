@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -113,7 +114,7 @@ export class AuthService {
 
         // Generar JWT para auto-login
         const roles = result.user.roles.map((ur: any) => ur.role.name);
-        const tokenData = await this.signToken(result.user.id, normalizedEmail, roles);
+        const tokenData = await this.signToken(result.user.id, normalizedEmail, roles, result.school.id, result.owner.id);
 
         return {
             ...tokenData,
@@ -142,11 +143,20 @@ export class AuthService {
         }
 
         const roles = user.roles.map((ur: any) => ur.role.name);
-        return this.signToken(user.id, user.email, roles);
+        let ownerId: number | undefined = undefined;
+
+        if (user.schoolId) {
+            const owner = await this.prisma.owner.findFirst({ where: { schoolId: user.schoolId } });
+            if (owner) {
+                ownerId = owner.id;
+            }
+        }
+
+        return this.signToken(user.id, user.email, roles, user.schoolId ?? undefined, ownerId);
     }
 
-    private async signToken(sub: number, email: string, roles: string[]) {
-        const payload = { sub, email, roles };
+    private async signToken(sub: number, email: string, roles: string[], schoolId?: number, ownerId?: number) {
+        const payload = { sub, email, roles, schoolId, ownerId };
         const secret = process.env.JWT_SECRET;
 
         const access_token = await this.jwt.signAsync(payload, {
@@ -206,9 +216,38 @@ export class AuthService {
             { secret: process.env.JWT_SECRET, expiresIn: '15m' },
         );
 
-        // TODO: Integrar con servicio de email (Nodemailer/SendGrid/Resend)
-        // Por ahora retornamos el token directamente para testing
-        this.logger.log(`Password reset token generated for user #${user.id}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+        try {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT) || 587,
+                secure: process.env.SMTP_PORT === '465',
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS,
+                },
+            });
+
+            await transporter.sendMail({
+                from: `"KioEdu Seguridad" <${process.env.SMTP_USER}>`,
+                to: user.email,
+                subject: 'Restablecimiento de contraseña',
+                html: `
+                    <h2>Restablecer contraseña</h2>
+                    <p>Has solicitado restablecer tu contraseña en KioEdu.</p>
+                    <p>Haz clic en el siguiente enlace para continuar:</p>
+                    <a href="${resetLink}">${resetLink}</a>
+                    <br><br>
+                    <p>Si no fuiste tú, ignora este correo.</p>
+                    <p>Este enlace expirará en 15 minutos.</p>
+                `,
+            });
+            this.logger.log(`Password reset email sent to user #${user.id}`);
+        } catch (error) {
+            this.logger.error(`Failed to send password reset email to user #${user.id}:`, error);
+        }
 
         return {
             message: genericMessage,

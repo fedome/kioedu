@@ -26,7 +26,7 @@ export class AdminController {
   @Patch('users/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { name?: string; email?: string }
+    @Body() body: { name?: string; email?: string; roles?: string[] }
   ) {
     return this.adminService.updateUser(id, body);
   }

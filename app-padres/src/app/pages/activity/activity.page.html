@@ -1,16 +1,17 @@
-<ion-header class="dashboard-header ion-no-border" *ngIf="!loadedChild">
-  <ion-toolbar class="dashboard-toolbar">
-
-
-    <ion-title class="header-title-center">
-      <div class="header-title">
-        <span class="header-kicker">Resumen</span>
-        <span class="header-main">Actividad</span>
+<ion-header class="mk-header mobile-rounded ion-no-border" *ngIf="!loadedChild">
+  <ion-toolbar class="mk-toolbar">
+    <ion-title>
+      <div class="mk-title-container">
+        <span class="mk-title-kicker">Resumen</span>
+        <span class="mk-title-main">Actividad</span>
       </div>
     </ion-title>
-
-    <app-notifications-bell slot="end"></app-notifications-bell>
-
+    <div slot="end" class="mk-header-actions">
+      <app-notifications-bell></app-notifications-bell>
+      <ion-button fill="clear" class="mk-profile-trigger" [routerLink]="['/tabs/profile']">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </div>
   </ion-toolbar>
 </ion-header>
 
@@ -148,41 +149,39 @@
     </div>
 
     <!-- Lista de movimientos -->
-    <ion-list class="activity-list" lines="none" *ngIf="!loading && filteredItems.length > 0">
-      <div class="movement-group-card rounded-card">
-        <ion-item button [detail]="false" *ngFor="let m of filteredItems; let last = last" class="movement-item" 
-          [class.no-border]="last" [class.pending-item]="m.status === 'PENDING'" (click)="openDetail(m)">
-          <!-- Icono de actividad similar al dashboard -->
+    <div class="activity-list" *ngIf="!loading && filteredItems.length > 0">
+      <div class="rounded-card no-shadow" style="padding: 0 20px;">
+        <div *ngFor="let m of filteredItems; let last = last" 
+          class="activity-item-premium" 
+          [class.pending-item]="m.status === 'PENDING'" 
+          (click)="openDetail(m)">
+          
           <div class="activity-icon" [class.bg-orange]="isDebit(m)" [class.bg-green]="!isDebit(m)">
             <ion-icon [name]="isDebit(m) ? 'fast-food-outline' : 'card-outline'"></ion-icon>
           </div>
 
-          <div class="movement-info">
+          <div class="activity-content">
             <div class="top-row">
-              <span class="item-name">
+              <span class="item-title">
                 {{ m.paymentMethod === 'TRANSFER' 
                    ? (isDebit(m) ? 'Transferencia enviada' : 'Transferencia recibida') 
-                   : (isDebit(m) ? m.description || 'Consumo Kiosco' : 'Recarga de Saldo') }}
+                   : (isDebit(m) ? m.description || 'Consumo Kio' : 'Recarga de Saldo') }}
               </span>
-              <span class="amount" [class.debit]="isDebit(m)" [class.credit]="!isDebit(m)">
-                {{ getAmountSign(m) }}
-                $ {{ m.amountCents / 100 | number: '1.2-2' }}
+              <span class="item-value" [class.expense]="isDebit(m)" [class.income]="!isDebit(m)">
+                {{ getAmountSign(m) }} $ {{ m.amountCents / 100 | number: '1.0-0' }}
               </span>
             </div>
 
-            <div class="mid-row">
-              <span class="activity-status-badge pending" *ngIf="m.status === 'PENDING'">
-                Pendiente de aprobación
-              </span>
-              <span class="child-sub" *ngIf="!loadedChild">{{ m.childName }} • </span>
-              <span class="date">
-                {{ m.createdAt | date: 'shortTime' }}
+            <div class="bottom-row">
+              <span class="status-pill" *ngIf="m.status === 'PENDING'">Pendiente</span>
+              <span class="meta-info">
+                {{ !loadedChild ? m.childName + ' • ' : '' }}{{ m.createdAt | date: 'HH:mm' }}
               </span>
             </div>
           </div>
-        </ion-item>
+        </div>
       </div>
-    </ion-list>
+    </div>
 
     <!-- Sin movimientos en general -->
     <div *ngIf="!loading && items.length === 0" class="empty-state">

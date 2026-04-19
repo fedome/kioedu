@@ -174,6 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
         crudFields.innerHTML += wrap('Colegio', `<select id="f_schoolId" required style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; outline: none; background: white;"><option value="">Seleccionar...</option>${optsS}</select>`);
       } else {
         crudFields.innerHTML += wrap('Email (Solo lectura)', `<input type="email" id="f_email" value="${data.email || ''}" disabled style="background:#f1f5f9;">`);
+        const currentRoles: string[] = data.roles || [];
+        const roleOptions = ['ADMIN', 'CASHIER', 'ENCARGADO', 'PARENT'].map(r =>
+          `<label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" name="f_roles" value="${r}" ${currentRoles.includes(r) ? 'checked' : ''} style="width:auto; padding:0; margin:0; outline:none; box-shadow:none;"> ${r}</label>`
+        ).join('');
+        crudFields.innerHTML += wrap('Roles', `<div style="display:flex; flex-wrap:wrap; gap:12px;">${roleOptions}</div>`);
       }
     }
 
@@ -219,7 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
          };
        } else {
          url = `/admin/users/${id}`;
-         body = { name: (document.getElementById('f_name') as HTMLInputElement).value };
+         const checkedRoles = Array.from(document.querySelectorAll('input[name="f_roles"]:checked')).map((cb: any) => cb.value);
+         body = { name: (document.getElementById('f_name') as HTMLInputElement).value, roles: checkedRoles };
        }
     }
 
@@ -419,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td style="padding: 16px;">${user.roles.map((r:any)=>`<span style="background:#e0f2fe; color:#0284c7; padding:2px 6px; border-radius:4px; font-size:0.75rem;">${esc(r.role.name)}</span>`).join('')}</td>
           <td style="padding: 16px;">${user.children.length} hijo(s)</td>
           <td style="padding: 16px; display: flex; gap: 8px;">
-             <button class="btn-edit-user" style="background:#f1f5f9; color:#334155; padding:6px 12px; border-radius:8px; border:none; cursor:pointer;" data-j='${JSON.stringify({id:user.id, name:user.name, email:user.email})}'>Editar</button>
+             <button class="btn-edit-user" style="background:#f1f5f9; color:#334155; padding:6px 12px; border-radius:8px; border:none; cursor:pointer;" data-j='${JSON.stringify({id:user.id, name:user.name, email:user.email, roles: user.roles.map((r:any) => r.role.name)})}'>Editar</button>
              <button class="btn-reset-pw" style="background:#f59e0b; color:white; padding:6px 12px; border-radius:8px; border:none; cursor:pointer;" data-id="${user.id}">Nueva Clave</button>
              <button class="btn-delete-user" style="color:var(--danger-color); background:transparent; border:none; cursor:pointer;" data-id="${user.id}">Borrar</button>
           </td>

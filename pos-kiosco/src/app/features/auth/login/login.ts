@@ -36,9 +36,27 @@ export class LoginComponent {
     this.showPassword.update(val => !val);
   }
 
-  // Agrega esto dentro de la clase LoginComponent
-  onForgotPassword() {
-    this.notifications.info('En desarrollo', 'Por favor, contacta al Administrador del sistema para restablecer tu clave manualmente.');
+  async onForgotPassword() {
+    const email = await this.confirmService.prompt({
+      title: 'Recuperar Contraseña',
+      message: 'Ingresá tu correo electrónico para enviarte las instrucciones de recuperación.',
+      inputPlaceholder: 'tucorreo@escuela.com',
+      confirmText: 'Enviar link',
+      cancelText: 'Cancelar',
+      type: 'warning' // or info, KioEdu usually uses warning for alerts
+    });
+
+    if (email && email.trim() !== '') {
+      try {
+        this.isLoading.set(true);
+        const resp = await this.authService.forgotPassword(email.trim());
+        this.notifications.success('Solicitud enviada', resp.message || 'Si el correo existe, recibirás un link de recuperación en breve.');
+      } catch (err: any) {
+        this.notifications.error('Error', err.error?.message || 'Hubo un problema al procesar la solicitud.');
+      } finally {
+        this.isLoading.set(false);
+      }
+    }
   }
 
   // --- SECRET WIPE DATA ---

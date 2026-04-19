@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import {
   IonicModule,
   AlertController,
@@ -76,6 +76,7 @@ export class DashboardPage implements OnInit {
   private actionSheetCtrl = inject(ActionSheetController);
   private auth = inject(AuthService);
   private cache = inject(CacheService);
+  private route = inject(ActivatedRoute);
 
   children: Child[] = [];
   loading = true;
@@ -116,6 +117,7 @@ export class DashboardPage implements OnInit {
     this.hydrateFromCache();
     this.loadData();
     this.loadProfile();
+    this.checkPaymentStatus();
   }
 
   private async hydrateFromCache() {
@@ -620,5 +622,45 @@ export class DashboardPage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  // --- Mercado Pago Result Handling ---
+  private checkPaymentStatus() {
+    const params = this.route.snapshot.queryParams;
+    const status = params['status'];
+    // Mercado Pago enviará payment_id o collection_id según el caso
+    const paymentId = params['payment_id'] || params['collection_id'];
+
+    if (status === 'success') {
+      this.showToast('¡Pago aprobado! El saldo se acreditará en unos instantes.', 'success');
+      // Recargamos datos para intentar ver el nuevo saldo (aunque el webhook tarda unos segundos)
+      setTimeout(() => this.loadData(), 3000);
+      this.clearQueryParams();
+    } else if (status === 'pending') {
+      this.showToast('El pago está pendiente de acreditación.', 'warning');
+      this.clearQueryParams();
+    } else if (status === 'error') {
+      this.showToast('Hubo un problema con el pago. Por favor, intentá de nuevo.', 'danger');
+      this.clearQueryParams();
+    }
+  }
+
+  private clearQueryParams() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { 
+        status: null, 
+        payment_id: null, 
+        collection_id: null, 
+        collection_status: null, 
+        external_reference: null, 
+        preference_id: null, 
+        merchant_order_id: null, 
+        processing_mode: null, 
+        merchant_account_id: null 
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 }

@@ -4,14 +4,13 @@ import { RouterModule, Router } from '@angular/router';
 import { CashierAuthService } from '../../core/auth/cashier-auth.service';
 import { UiService } from '../../core/services/ui.service';
 import { EditProfileModalComponent } from '../edit-profile-modal/edit-profile-modal';
-import { ToastContainerComponent } from '../../shared/toast-container/toast-container';
 import { SyncService } from '../../core/services/sync.service';
 import { AiChatWidgetComponent } from '../../features/ai-chat/ai-chat-widget/ai-chat-widget';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, EditProfileModalComponent, ToastContainerComponent, AiChatWidgetComponent],
+  imports: [CommonModule, RouterModule, EditProfileModalComponent, AiChatWidgetComponent],
   templateUrl: './shell.html',
   styleUrls: ['./shell.scss']
 })

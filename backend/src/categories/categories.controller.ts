@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -17,29 +17,29 @@ export class CategoriesController {
 
     @Post()
     @Roles(Role.ADMIN, Role.ENCARGADO, Role.CASHIER, Role.PARENT)
-    create(@Body() createCategoryDto: CreateCategoryDto) {
-        return this.categoriesService.create(createCategoryDto);
+    create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: any) {
+        return this.categoriesService.create(createCategoryDto, req.user.ownerId);
     }
 
     @Get()
-    findAll() {
-        return this.categoriesService.findAll();
+    findAll(@Req() req: any) {
+        return this.categoriesService.findAll(req.user.ownerId);
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.categoriesService.findOne(+id);
+    findOne(@Param('id') id: string, @Req() req: any) {
+        return this.categoriesService.findOne(+id, req.user.ownerId);
     }
 
     @Patch(':id')
     @Roles(Role.ADMIN, Role.ENCARGADO, Role.CASHIER, Role.PARENT)
-    update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-        return this.categoriesService.update(+id, updateCategoryDto);
+    update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto, @Req() req: any) {
+        return this.categoriesService.update(+id, updateCategoryDto, req.user.ownerId);
     }
 
     @Delete(':id')
     @Roles(Role.ADMIN, Role.ENCARGADO, Role.CASHIER, Role.PARENT)
-    remove(@Param('id') id: string) {
-        return this.categoriesService.remove(+id);
+    remove(@Param('id') id: string, @Req() req: any) {
+        return this.categoriesService.remove(+id, req.user.ownerId);
     }
 }

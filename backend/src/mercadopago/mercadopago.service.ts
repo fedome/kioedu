@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Payment, Preference, OAuth } from 'mercadopago';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -69,6 +69,13 @@ export class MercadoPagoService {
         const preference = new Preference(client);
 
         try {
+            this.logger.log(`Creando preferencia con: ${JSON.stringify({
+                transactionId: params.transactionId,
+                amount: params.amountCents / 100,
+                backUrls: params.backUrls,
+                notificationUrl: params.notificationUrl
+            })}`);
+
             const result = await preference.create({
                 body: {
                     items: [
@@ -82,8 +89,12 @@ export class MercadoPagoService {
                     ],
                     external_reference: params.transactionId.toString(),
                     notification_url: params.notificationUrl,
-                    back_urls: params.backUrls,
-                    auto_return: 'approved',
+                    back_urls: {
+                        success: params.backUrls?.success,
+                        failure: params.backUrls?.failure,
+                        pending: params.backUrls?.pending,
+                    },
+                    // auto_return: 'approved',
                     payment_methods: {
                         excluded_payment_types: [
                             { id: 'ticket' }
@@ -111,6 +122,45 @@ export class MercadoPagoService {
             return await payment.get({ id: paymentId });
         } catch (error) {
             this.logger.error(`Error al consultar pago MP ${paymentId}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    getAuthUrl() {
+        const clientId = this.configService.get<string>('MP_CLIENT_ID');
+        const redirectUri = this.configService.get<string>('FRONTEND_URL') + '/settings';
+        
+        // Mercado Pago OAuth URL - Versión completa recomendada
+        return `https://auth.mercadopago.com.ar/authorization?client_id=${clientId}&response_type=code&platform_id=mp&state=kio_${Math.random().toString(36).substring(7)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    }
+
+    async exchangeCodeForToken(code: string) {
+        const clientId = this.configService.get<string>('MP_CLIENT_ID');
+        const clientSecret = this.configService.get<string>('MP_CLIENT_SECRET');
+        const redirectUri = this.configService.get<string>('FRONTEND_URL') + '/settings';
+
+        const client = new MercadoPagoConfig({ accessToken: 'NOT_NEEDED_YET' }); // OAuth create don't strictly need it in body but the SDK might require it in config or as a clean client
+        const oauth = new OAuth(client);
+
+        try {
+            const result = await (oauth as any).create({
+                body: {
+                    client_id: clientId as string,
+                    client_secret: clientSecret as string,
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: redirectUri,
+                }
+            });
+
+            return {
+                accessToken: result.access_token,
+                publicKey: result.public_key,
+                refreshToken: result.refresh_token,
+                userId: result.user_id,
+            };
+        } catch (error) {
+            this.logger.error(`Error al intercambiar código OAuth: ${error.message}`);
             throw error;
         }
     }

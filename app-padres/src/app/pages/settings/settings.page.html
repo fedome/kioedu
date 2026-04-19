@@ -1,15 +1,17 @@
-<ion-header class="dashboard-header ion-no-border">
-  <ion-toolbar class="dashboard-toolbar">
-
-
-    <!-- Título centrado -->
-    <ion-title class="header-title-center">
-      <div class="header-title">
-        <span class="header-kicker">Ajustes</span>
-        <span class="header-main">Configuración</span>
+<ion-header class="mk-header mobile-rounded ion-no-border">
+  <ion-toolbar class="mk-toolbar">
+    <ion-title>
+      <div class="mk-title-container">
+        <span class="mk-title-kicker">Ajustes</span>
+        <span class="mk-title-main">Configuración</span>
       </div>
     </ion-title>
-
+    <div slot="end" class="mk-header-actions">
+      <app-notifications-bell></app-notifications-bell>
+      <ion-button fill="clear" class="mk-profile-trigger" [routerLink]="['/tabs/profile']">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </div>
   </ion-toolbar>
 </ion-header>
 

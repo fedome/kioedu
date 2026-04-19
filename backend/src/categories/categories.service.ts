@@ -7,37 +7,37 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CategoriesService {
     constructor(private prisma: PrismaService) { }
 
-    create(createCategoryDto: CreateCategoryDto) {
+    create(createCategoryDto: CreateCategoryDto, ownerId: number) {
         return this.prisma.category.create({
-            data: { ...createCategoryDto, ownerId: 1 },
+            data: { ...createCategoryDto, ownerId },
         });
     }
 
-    findAll() {
+    findAll(ownerId: number) {
         return this.prisma.category.findMany({
-            where: { isActive: true },
+            where: { isActive: true, ownerId },
             orderBy: { name: 'asc' },
         });
     }
 
-    async findOne(id: number) {
-        const category = await this.prisma.category.findUnique({
-            where: { id },
+    async findOne(id: number, ownerId: number) {
+        const category = await this.prisma.category.findFirst({
+            where: { id, ownerId },
         });
         if (!category) throw new NotFoundException(`Category #${id} not found`);
         return category;
     }
 
-    async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-        await this.findOne(id); // Ensure exists
+    async update(id: number, updateCategoryDto: UpdateCategoryDto, ownerId: number) {
+        await this.findOne(id, ownerId); // Ensure exists for this owner
         return this.prisma.category.update({
             where: { id },
             data: updateCategoryDto,
         });
     }
 
-    async remove(id: number) {
-        await this.findOne(id); // Ensure exists
+    async remove(id: number, ownerId: number) {
+        await this.findOne(id, ownerId); // Ensure exists for this owner
         // Soft delete
         return this.prisma.category.update({
             where: { id },

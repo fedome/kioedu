@@ -1,0 +1,28 @@
+<div class="rail-container">
+  <div class="brand-logo" [routerLink]="['/tabs/dashboard']">
+    <img src="assets/Logo/LogoKioEduSinFondo.svg" alt="KioEdu" />
+    <div class="brand-text">
+      <span class="kio">Kio</span><span class="edu">Edu</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <div 
+      *ngFor="let p of appPages" 
+      class="nav-item" 
+      [routerLink]="p.url" 
+      routerLinkActive="active">
+      <div class="icon-box">
+        <ion-icon [name]="p.icon"></ion-icon>
+      </div>
+      <span class="nav-label">{{ p.title }}</span>
+    </div>
+  </nav>
+
+  <div class="rail-footer">
+    <button class="logout-btn" (click)="logout()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      <span class="nav-label">Cerrar Sesión</span>
+    </button>
+  </div>
+</div>

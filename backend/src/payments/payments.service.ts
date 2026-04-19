@@ -229,4 +229,31 @@ export class PaymentsService {
       data: { status: TransactionStatus.CANCELED },
     });
   }
+
+  async getOwnerMpInfoBySchool(schoolId: number) {
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      include: { owners: true }
+    });
+    return school?.owners?.[0] || null;
+  }
+
+  async updateOwnerMpTokenBySchool(schoolId: number, accessToken: string, publicKey: string) {
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      include: { owners: true }
+    });
+    
+    if (!school || !school.owners || school.owners.length === 0) {
+      throw new NotFoundException('Dueño de escuela no encontrado');
+    }
+
+    return this.prisma.owner.update({
+      where: { id: school.owners[0].id },
+      data: {
+        mpAccessToken: accessToken,
+        mpPublicKey: publicKey
+      }
+    });
+  }
 }

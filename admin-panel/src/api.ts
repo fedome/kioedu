@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.36:3000/api/v1';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.38:3000/api/v1';
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('kio_admin_token');

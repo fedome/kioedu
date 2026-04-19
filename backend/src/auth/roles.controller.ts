@@ -9,7 +9,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 @ApiTags('Roles & Permissions')
 @ApiBearerAuth('JWT')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
 @Controller('roles')
 export class RolesController {
     constructor(private readonly rolesService: RolesService) { }
@@ -33,12 +32,14 @@ export class RolesController {
     }
 
     @Post()
+    @Roles(Role.ADMIN)
     @ApiOperation({ summary: 'Create a new role' })
     createRole(@Body() dto: { name: string; schoolId?: number; description?: string; permissionIds?: number[] }) {
         return this.rolesService.createRole(dto.name, dto.schoolId, dto.description, dto.permissionIds);
     }
 
     @Put(':id')
+    @Roles(Role.ADMIN)
     @ApiOperation({ summary: 'Update a role' })
     updateRole(
         @Param('id', ParseIntPipe) id: number,
@@ -48,6 +49,7 @@ export class RolesController {
     }
 
     @Delete(':id')
+    @Roles(Role.ADMIN)
     @ApiOperation({ summary: 'Delete a role' })
     deleteRole(@Param('id', ParseIntPipe) id: number) {
         return this.rolesService.deleteRole(id);
@@ -60,6 +62,7 @@ export class RolesController {
     }
 
     @Post('permissions')
+    @Roles(Role.ADMIN)
     @ApiOperation({ summary: 'Create a new permission' })
     createPermission(@Body() dto: { action: string; subject: string; description?: string }) {
         return this.rolesService.createPermission(dto.action, dto.subject, dto.description);

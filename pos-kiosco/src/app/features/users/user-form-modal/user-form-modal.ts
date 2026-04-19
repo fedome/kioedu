@@ -40,7 +40,7 @@ export class UserFormModalComponent implements OnChanges, OnInit {
     async loadRoles() {
         try {
             const schoolId = this.auth.currentUser()?.schoolId;
-            const roles = await this.usersService.findAllRoles(schoolId, true);
+            const roles = await this.usersService.findAllRoles(schoolId, false);
             this.availableRoles.set(roles);
         } catch (error) {
             console.error('Error loading roles', error);
@@ -49,6 +49,9 @@ export class UserFormModalComponent implements OnChanges, OnInit {
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['isOpen']?.currentValue === true) {
+            // Always reload roles when the modal opens
+            this.loadRoles();
+
             if (this.user) {
                 this.name = this.user.name;
                 this.email = this.user.email;
@@ -96,6 +99,11 @@ export class UserFormModalComponent implements OnChanges, OnInit {
             return;
         }
 
+        if (this.selectedRoles.length === 0) {
+            this.errorMessage.set('Debe asignar al menos un rol al usuario');
+            return;
+        }
+
         this.isSaving.set(true);
         this.errorMessage.set('');
 
@@ -135,7 +143,7 @@ export class UserFormModalComponent implements OnChanges, OnInit {
             this.saved.emit();
             this.onClose();
         } catch (error: any) {
-            this.errorMessage.set(error.message || 'Error al guardar el usuario');
+            this.errorMessage.set(error.error?.message || error.message || 'Error al guardar el usuario');
         } finally {
             this.isSaving.set(false);
         }

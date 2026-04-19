@@ -46,7 +46,11 @@ export class UsersController {
     @ApiOperation({ summary: 'Crear un nuevo usuario (Cajero o Admin)' })
     @ApiCreatedResponse({ type: UserDto })
     @ApiCommonErrors()
-    create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
+    create(@Body() createUserDto: CreateUserDto, @Req() req: any): Promise<UserDto> {
+        // Enforce the tenant context correctly
+        if (req.user.schoolId) {
+            createUserDto.schoolId = req.user.schoolId;
+        }
         return this.usersService.create(createUserDto);
     }
 
@@ -56,16 +60,17 @@ export class UsersController {
     @ApiQuery({ name: 'schoolId', type: Number, required: false })
     @ApiOkResponse({ type: [UserDto] })
     @ApiCommonErrors()
-    findAll(@Query('role') role?: string, @Query('schoolId') schoolId?: string): Promise<UserDto[]> {
-        return this.usersService.findAll(schoolId ? Number(schoolId) : undefined, role);
+    findAll(@Req() req: any, @Query('role') role?: string, @Query('schoolId') schoolId?: string): Promise<UserDto[]> {
+        const targetSchool = req.user.schoolId ? req.user.schoolId : (schoolId ? Number(schoolId) : undefined);
+        return this.usersService.findAll(targetSchool, role);
     }
 
     @Get(':id')
     @ApiOperation({ summary: 'Obtener un usuario por ID' })
     @ApiOkResponse({ type: UserDto })
     @ApiCommonErrors()
-    findOne(@Param('id', ParseIntPipe) id: number): Promise<UserDto | null> {
-        return this.usersService.findById(id);
+    findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<UserDto | null> {
+        return this.usersService.findById(id, req.user.schoolId);
     }
 
     /*@Delete(':id')
@@ -83,8 +88,9 @@ export class UsersController {
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,
+        @Req() req: any
     ): Promise<UserDto> {
-        return this.usersService.update(id, updateUserDto);
+        return this.usersService.update(id, updateUserDto, req.user.schoolId);
     }
 
     @Put(':id/password')
@@ -94,16 +100,17 @@ export class UsersController {
     resetPassword(
         @Param('id', ParseIntPipe) id: number,
         @Body() resetPasswordDto: ResetPasswordDto,
+        @Req() req: any
     ): Promise<UserDto> {
-        return this.usersService.resetPassword(id, resetPasswordDto);
+        return this.usersService.resetPassword(id, resetPasswordDto, req.user.schoolId);
     }
 
     @Delete(':id')
     @ApiOperation({ summary: 'Desactivar usuario (Soft Delete)' }) // Actualiza la descripción
     @ApiOkResponse({ type: UserDto })
     @ApiCommonErrors()
-    remove(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
-        return this.usersService.delete(id);
+    remove(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<UserDto> {
+        return this.usersService.delete(id, req.user.schoolId);
     }
 
     // --- NUEVO ENDPOINT ---
@@ -111,8 +118,8 @@ export class UsersController {
     @ApiOperation({ summary: 'Reactivar un usuario desactivado' })
     @ApiOkResponse({ type: UserDto })
     @ApiCommonErrors()
-    reactivate(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
-        return this.usersService.reactivate(id);
+    reactivate(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<UserDto> {
+        return this.usersService.reactivate(id, req.user.schoolId);
     }
 
     @Post('me/children')
@@ -120,7 +127,7 @@ export class UsersController {
     // Permitimos que PARENT use esto también
     @Roles(Role.ADMIN, Role.PARENT)
     createChild(@Req() req: any, @Body() dto: CreateChildDto) {
-        return this.usersService.addChild(req.user.sub, dto);
+        return this.usersService.addChild(req.user.sub, dto, req.user.schoolId, req.user.ownerId);
     }
 
     @Post('children/:childId/card')

@@ -39,7 +39,7 @@ export class UsersService {
         const hash = await bcrypt.hash(dto.password, 12);
 
         try {
-            const roleNames = dto.roles && dto.roles.length > 0 ? dto.roles : [Role.PARENT];
+            const roleNames = dto.roles && dto.roles.length > 0 ? dto.roles : [Role.CASHIER];
 
             const user = await this.prisma.user.create({
                 data: {
@@ -99,9 +99,9 @@ export class UsersService {
     /**
      * Busca un usuario por ID (usado por el Admin CRUD).
      */
-    async findById(id: number): Promise<UserDto | null> {
-        const user = await this.prisma.user.findUnique({
-            where: { id },
+    async findById(id: number, schoolId?: number): Promise<UserDto | null> {
+        const user = await this.prisma.user.findFirst({
+            where: { id, ...(schoolId ? { schoolId } : {}) },
             include: { roles: { include: { role: true } } }
         });
         if (!user) return null;
@@ -131,25 +131,16 @@ export class UsersService {
     }
 
     /**
-     * Elimina un usuario.
+     * Elimina un usuario (hard delete removido, ver soft delete abajo).
      */
-    /*async delete(id: number): Promise<UserDto> {
-        try {
-            const user = await this.prisma.user.delete({ where: { id } });
-            return this.mapToDto(user);
-        } catch (e) {
-            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-                throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
-            }
-            throw e;
-        }
-    }*/
 
     /**
      * Actualiza un usuario (nombre, email, rol) por ID.
      */
-    async update(id: number, dto: UpdateUserDto & { password?: string }): Promise<UserDto> {
+    async update(id: number, dto: UpdateUserDto & { password?: string }, schoolId?: number): Promise<UserDto> {
         try {
+            const existing = await this.prisma.user.findFirst({ where: { id, ...(schoolId ? { schoolId } : {}) } });
+            if (!existing) throw new NotFoundException(`Usuario con ID ${id} no encontrado en tu escuela.`);
             const { roles, password, ...rest } = dto;
             const data: Prisma.UserUpdateInput = { ...rest };
 
@@ -199,7 +190,9 @@ export class UsersService {
     /**
      * Resetea la contraseña de un usuario por ID.
      */
-    async resetPassword(id: number, dto: ResetPasswordDto): Promise<UserDto> {
+    async resetPassword(id: number, dto: ResetPasswordDto, schoolId?: number): Promise<UserDto> {
+        const existing = await this.prisma.user.findFirst({ where: { id, ...(schoolId ? { schoolId } : {}) } });
+        if (!existing) throw new NotFoundException(`Usuario con ID ${id} no encontrado en tu escuela.`);
         // 1. Hashear la nueva contraseña
         const hash = await bcrypt.hash(dto.password, 12);
 
@@ -225,8 +218,11 @@ export class UsersService {
      * @param parentId ID del usuario padre
      * @param dto Datos del hijo a crear
      */
-    async addChild(parentId: number, dto: CreateChildDto) {
-        const defaultSchoolId = 1;
+    async addChild(parentId: number, dto: CreateChildDto, userSchoolId?: number, userOwnerId?: number) {
+        // Enforce Kiosk/Admin context if provided, else root school 1. 
+        // This stops parents from blindly saving in root if the KioEdu goes global, though standard single-tenant it's OK.
+        const defaultSchoolId = userSchoolId || 1;
+        const ownerIdToBind = userOwnerId || 1;
 
         return this.prisma.child.create({
             data: {
@@ -241,7 +237,7 @@ export class UsersService {
                 schoolId: defaultSchoolId,
                 parentId: parentId,
 
-                accounts: { create: { balanceCents: 0, ownerId: 1 } },
+                accounts: { create: { balanceCents: 0, ownerId: ownerIdToBind } },
 
             }
         });
@@ -402,10 +398,13 @@ export class UsersService {
     /**
      * Soft Delete: Desactiva al usuario para que no pueda loguearse.
      */
-    async delete(id: number): Promise<UserDto> {
+    async delete(id: number, schoolId?: number): Promise<UserDto> {
         // Validar que no se esté borrando a sí mismo (opcional pero recomendado)
         // (Lo dejamos simple por ahora)
         try {
+            const existing = await this.prisma.user.findFirst({ where: { id, ...(schoolId ? { schoolId } : {}) } });
+            if (!existing) throw new NotFoundException(`Usuario con ID ${id} no encontrado en tu escuela.`);
+
             const user = await this.prisma.user.update({
                 where: { id },
                 data: { isActive: false }, // <-- CAMBIO A SOFT DELETE
@@ -420,8 +419,11 @@ export class UsersService {
     /**
      * Reactivar Usuario.
      */
-    async reactivate(id: number): Promise<UserDto> {
+    async reactivate(id: number, schoolId?: number): Promise<UserDto> {
         try {
+            const existing = await this.prisma.user.findFirst({ where: { id, ...(schoolId ? { schoolId } : {}) } });
+            if (!existing) throw new NotFoundException(`Usuario con ID ${id} no encontrado en tu escuela.`);
+
             const user = await this.prisma.user.update({
                 where: { id },
                 data: { isActive: true },

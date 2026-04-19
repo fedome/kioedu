@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   //apiUrl: 'http://localhost:3000/api/v1'
-  apiUrl: 'http://192.168.1.36:3000/api/v1',
+  apiUrl: 'http://192.168.1.38:3000/api/v1',
   //apiUrl: 'https://randa-nonpressing-nonradiantly.ngrok-free.dev/api/v1'
 
 };

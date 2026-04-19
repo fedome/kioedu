@@ -50,8 +50,9 @@
 
     <!-- Footer -->
     <div class="modal-footer">
-      <ion-button expand="block" class="pill-button btn-primary shadow-sm" [disabled]="form.invalid" (click)="confirm()">
-        Confirmar Carga
+      <ion-button expand="block" class="pill-button btn-primary shadow-sm" [disabled]="form.invalid || isLoading" (click)="confirm()">
+        <ion-spinner name="crescent" *ngIf="isLoading" style="margin-right: 8px;"></ion-spinner>
+        {{ isLoading ? 'Procesando...' : 'Confirmar Carga' }}
       </ion-button>
       <ion-button fill="clear" expand="block" color="danger" (click)="cancel()" class="back-button">
         CANCELAR

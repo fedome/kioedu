@@ -39,6 +39,7 @@ export class TopupModalComponent {
   ticketAmount = 0;
   ticketRef = '';
   form: FormGroup;
+  isLoading = false;
 
   constructor() {
     addIcons({ cardOutline, storefrontOutline, walletOutline, closeOutline, checkmarkCircleOutline });
@@ -123,16 +124,19 @@ export class TopupModalComponent {
 
     if (this.selectedMethod === 'mp') {
       // -- FLUJO REAL MERCADO PAGO --
+      this.isLoading = true;
       this.paymentsService.createMPPreference(this.child.id, amountCents).subscribe({
         next: async (res) => {
           if (res.init_point) {
             window.location.href = res.init_point;
           } else {
+            this.isLoading = false;
             this.uiNotifications.error('Error de pago', 'No se pudo generar la preferencia de Mercado Pago.');
             await this.modalCtrl.dismiss(null, 'cancel');
           }
         },
         error: async (err) => {
+          this.isLoading = false;
           console.error('Error MP Preference:', err);
           this.uiNotifications.error('Error de pago', 'No se pudo conectar con Mercado Pago. Intentá de nuevo más tarde.');
           await this.modalCtrl.dismiss(null, 'cancel');

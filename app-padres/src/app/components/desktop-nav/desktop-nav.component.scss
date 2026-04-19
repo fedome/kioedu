@@ -1,0 +1,125 @@
+.rail-container {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  height: 100vh;
+  background: var(--mk-card-bg);
+  backdrop-filter: var(--mk-glass-blur);
+  -webkit-backdrop-filter: var(--mk-glass-blur);
+  border-right: 1px solid var(--mk-card-border);
+  padding: 32px 20px;
+  box-shadow: var(--mk-card-shadow);
+  z-index: 1001;
+  transition: all 0.3s ease;
+
+  @media (max-width: 991px) {
+    display: none;
+  }
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+  cursor: pointer;
+
+  img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+
+  .brand-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 26px;
+    font-weight: 850;
+    letter-spacing: -1px;
+    line-height: 1;
+    
+    .kio { color: var(--ion-color-primary); }
+    .edu { color: var(--mk-text-main); }
+  }
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  padding: 12px 16px;
+  color: var(--mk-text-subtle);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+
+  .icon-box {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  &:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    color: var(--ion-color-primary);
+  }
+
+  &.active {
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    color: var(--ion-color-primary);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 12px;
+      bottom: 12px;
+      width: 4px;
+      background: var(--ion-color-primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .nav-label {
+      font-weight: 800;
+    }
+  }
+}
+
+.rail-footer {
+  padding-top: 24px;
+  border-top: 1px solid rgba(var(--mk-text-main-rgb), 0.05);
+
+  .logout-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+  }
+}

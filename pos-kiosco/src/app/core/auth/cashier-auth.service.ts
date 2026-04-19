@@ -34,7 +34,18 @@ export class CashierAuthService {
   private readonly TOKEN_KEY = 'cashier_token';
   private readonly USER_KEY = 'cashier_user';
 
-  // --- STATE (SIGNALS) ---
+  // --- PASSWORD RECOVERY ---
+  async forgotPassword(email: string): Promise<any> {
+    const url = `/auth/password/forgot`;
+    return firstValueFrom(this.api.post(url, { email }));
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<any> {
+    const url = `/auth/password/reset`;
+    return firstValueFrom(this.api.post(url, { token, newPassword }));
+  }
+
+  // --- TOKEN UTILS ---
   // Esto permite que el Header, el Modal y los Guards reaccionen automáticamente
   currentUser = signal<CashierUser | null>(this.getUserFromStorage());
 

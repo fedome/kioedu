@@ -40,10 +40,36 @@ export class AdminService {
     });
   }
 
-  async updateUser(id: number, data: { name?: string; email?: string }) {
-    return this.prisma.user.update({
+  async updateUser(id: number, data: { name?: string; email?: string; roles?: string[] }) {
+    const { roles, ...userData } = data;
+
+    // Update basic fields
+    const user = await this.prisma.user.update({
       where: { id },
-      data
+      data: userData,
+    });
+
+    // Sync roles if provided
+    if (roles && roles.length > 0) {
+      // Remove all existing roles
+      await this.prisma.userRole.deleteMany({ where: { userId: id } });
+
+      // Assign the new roles
+      for (const roleName of roles) {
+        let role = await this.prisma.role.findUnique({ where: { name: roleName } });
+        if (!role) {
+          role = await this.prisma.role.create({ data: { name: roleName } });
+        }
+        await this.prisma.userRole.create({
+          data: { userId: id, roleId: role.id },
+        });
+      }
+    }
+
+    // Return the user with updated roles
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: { roles: { include: { role: { select: { name: true } } } } },
     });
   }
 
